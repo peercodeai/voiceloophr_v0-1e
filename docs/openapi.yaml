@@ -1,0 +1,526 @@
+openapi: 3.0.3
+info:
+  title: VoiceLoop HR API
+  description: API for VoiceLoop HR - AI-powered document processing and analysis platform
+  version: 1.0.0
+  contact:
+    name: VoiceLoop HR Support
+    email: support@voiceloophr.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: https://voiceloophr.com
+    description: Production server
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
+
+paths:
+  /api/upload:
+    post:
+      summary: Upload and process a document
+      description: Upload a document for processing and analysis. Supports various file types including PDF, Word, text, and media files.
+      tags:
+        - Documents
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The document file to upload
+                saveToDatabase:
+                  type: boolean
+                  default: true
+                  description: Whether to save the document to the database
+                userId:
+                  type: string
+                  format: uuid
+                  description: User ID (optional, can be derived from auth context)
+            encoding:
+              file:
+                contentType: application/pdf, text/plain, text/markdown, text/csv, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, image/jpeg, image/png, audio/wav, video/mp4
+      responses:
+        '200':
+          description: Document uploaded and processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  fileId:
+                    type: string
+                    example: "file_1234567890_abc123"
+                  fileName:
+                    type: string
+                    example: "document.pdf"
+                  fileType:
+                    type: string
+                    example: "application/pdf"
+                  fileSize:
+                    type: integer
+                    example: 1024000
+                  wordCount:
+                    type: integer
+                    example: 1500
+                  extractedText:
+                    type: string
+                    example: "This is the extracted text content..."
+                  saved:
+                    type: boolean
+                    example: true
+                  storagePath:
+                    type: string
+                    example: "files/user-123/file_1234567890_abc123/document.pdf"
+                  contentType:
+                    type: string
+                    example: "application/pdf"
+                  documentId:
+                    type: string
+                    format: uuid
+                    example: "doc-123e4567-e89b-12d3-a456-426614174000"
+                  message:
+                    type: string
+                    example: "File uploaded and text extracted successfully"
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/documents:
+    get:
+      summary: Get user documents
+      description: Retrieve paginated list of documents for the authenticated user
+      tags:
+        - Documents
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: User ID
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number for pagination
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          description: Number of documents per page
+      responses:
+        '200':
+          description: Documents retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  documents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Document'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationInfo'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/documents/store:
+    post:
+      summary: Store document with embeddings
+      description: Store a processed document in the database with vector embeddings for semantic search
+      tags:
+        - Documents
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+                - fileName
+              properties:
+                content:
+                  type: string
+                  description: The text content of the document
+                fileName:
+                  type: string
+                  description: Original file name
+                userId:
+                  type: string
+                  format: uuid
+                  description: User ID (optional, can be derived from auth context)
+      responses:
+        '200':
+          description: Document stored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  documentId:
+                    type: string
+                    format: uuid
+                    example: "doc-123e4567-e89b-12d3-a456-426614174000"
+                  message:
+                    type: string
+                    example: "Document stored and vectorized successfully"
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/analyze:
+    post:
+      summary: Analyze document content
+      description: Perform AI-powered analysis on document content
+      tags:
+        - Analysis
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+                - fileName
+              properties:
+                text:
+                  type: string
+                  description: Text content to analyze
+                fileName:
+                  type: string
+                  description: Name of the file being analyzed
+                fileType:
+                  type: string
+                  description: MIME type of the file
+                openaiKey:
+                  type: string
+                  description: OpenAI API key (optional, can use environment variable)
+      responses:
+        '200':
+          description: Analysis completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  analysis:
+                    $ref: '#/components/schemas/DocumentAnalysis'
+                  message:
+                    type: string
+                    example: "Document analyzed successfully with OpenAI"
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/chat:
+    post:
+      summary: Chat with AI assistant
+      description: Send a message to the AI assistant with optional document context
+      tags:
+        - Chat
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                  description: User message
+                contextText:
+                  type: string
+                  description: Optional context text from documents
+                fileId:
+                  type: string
+                  description: Optional file ID for context
+                openaiKey:
+                  type: string
+                  description: OpenAI API key (optional)
+      responses:
+        '200':
+          description: Chat response generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  response:
+                    type: string
+                    example: "Based on the document, here's what I found..."
+                  hasContext:
+                    type: boolean
+                    example: true
+                  metadata:
+                    type: object
+                    additionalProperties: true
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    Document:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "doc-123e4567-e89b-12d3-a456-426614174000"
+        userId:
+          type: string
+          format: uuid
+          example: "user-123e4567-e89b-12d3-a456-426614174000"
+        fileName:
+          type: string
+          example: "document.pdf"
+        content:
+          type: string
+          example: "This is the document content..."
+        wordCount:
+          type: integer
+          example: 1500
+        pages:
+          type: integer
+          example: 5
+        metadata:
+          $ref: '#/components/schemas/DocumentMetadata'
+        analysis:
+          $ref: '#/components/schemas/DocumentAnalysis'
+        uploadedAt:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+        processed:
+          type: boolean
+          example: true
+        processingError:
+          type: string
+          nullable: true
+          example: null
+
+    DocumentMetadata:
+      type: object
+      properties:
+        pageCount:
+          type: integer
+          example: 5
+        wordCount:
+          type: integer
+          example: 1500
+        fileSize:
+          type: integer
+          example: 1024000
+        processingVersion:
+          type: string
+          example: "2.0.0"
+        processingMethod:
+          type: string
+          example: "direct"
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          example: 0.95
+        note:
+          type: string
+          example: "Document processed successfully"
+
+    DocumentAnalysis:
+      type: object
+      properties:
+        summary:
+          type: string
+          example: "This document discusses AI and machine learning concepts..."
+        keywords:
+          type: array
+          items:
+            type: string
+          example: ["AI", "machine learning", "technology"]
+        sentimentScore:
+          type: number
+          minimum: -1
+          maximum: 1
+          example: 0.8
+        topics:
+          type: array
+          items:
+            type: string
+          example: ["Technology", "Artificial Intelligence"]
+        entities:
+          type: array
+          items:
+            type: string
+          example: ["OpenAI", "GPT", "Machine Learning"]
+        language:
+          type: string
+          example: "en"
+        readingTime:
+          type: integer
+          example: 5
+        complexity:
+          type: string
+          enum: ["low", "medium", "high"]
+          example: "medium"
+
+    PaginationInfo:
+      type: object
+      properties:
+        currentPage:
+          type: integer
+          example: 1
+        pageSize:
+          type: integer
+          example: 10
+        totalDocuments:
+          type: integer
+          example: 25
+        totalPages:
+          type: integer
+          example: 3
+
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: "Validation failed"
+        code:
+          type: string
+          example: "VALIDATION_ERROR"
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                example: "fileName"
+              issue:
+                type: string
+                example: "File name cannot be empty"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+        requestId:
+          type: string
+          example: "req-123e4567-e89b-12d3-a456-426614174000"
+
+  responses:
+    BadRequestError:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            statusCode: 400
+            message: "Validation failed"
+            code: "VALIDATION_ERROR"
+            details:
+              - field: "fileName"
+                issue: "File name cannot be empty"
+
+    UnauthorizedError:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            statusCode: 401
+            message: "Authentication required"
+            code: "AUTHENTICATION_REQUIRED"
+
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            statusCode: 500
+            message: "Internal server error"
+            code: "INTERNAL_ERROR"
+
+tags:
+  - name: Documents
+    description: Document upload, storage, and retrieval operations
+  - name: Analysis
+    description: AI-powered document analysis and processing
+  - name: Chat
+    description: AI chat and conversation features

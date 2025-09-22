@@ -1,0 +1,29 @@
+        {/* Recent Documents - Show placeholder for unauthenticated users */}
+        <div className="mb-8">
+          {userId ? (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-light text-foreground">Recent Documents</h2>
+                <Button variant="outline" size="sm" className="font-light bg-transparent" asChild>
+                  <Link href="/upload">Upload New</Link>
+                </Button>
+              </div>
+              <div className="text-center py-8">
+                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground font-light mb-4">No documents uploaded yet</p>
+                <Button asChild>
+                  <Link href="/upload">
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload Your First Document
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <PlaceholderDocuments />
+          )}
+        </div>
+
+      </div>
+
+

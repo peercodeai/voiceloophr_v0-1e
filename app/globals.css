@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Soft, modern palette – light mode */
+    --background: 0 0% 99%;
+    --foreground: 222 20% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 20% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 20% 12%;
+    --primary: 222 74% 55%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 222 20% 18%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 8% 45%;
+    --accent: 220 18% 97%;
+    --accent-foreground: 222 20% 18%;
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 13% 90%;
+    --input: 220 13% 90%;
+    --ring: 222 74% 55%;
+    --radius: 0.6rem;
+  }
+
+  .dark {
+    /* Dimmed dark mode for eye comfort */
+    --background: 222 20% 10%;
+    --foreground: 210 40% 96%;
+    --card: 222 16% 12%;
+    --card-foreground: 210 40% 96%;
+    --popover: 222 16% 12%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 222 74% 65%;
+    --primary-foreground: 222 20% 10%;
+    --secondary: 222 14% 18%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 222 14% 16%;
+    --muted-foreground: 222 10% 70%;
+    --accent: 222 14% 18%;
+    --accent-foreground: 210 40% 96%;
+    --destructive: 0 62% 54%;
+    --destructive-foreground: 210 40% 96%;
+    --border: 222 14% 20%;
+    --input: 222 14% 20%;
+    --ring: 222 74% 65%;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+@layer components {
+  /* Smooth transitions for theme switching */
+  * {
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary));
+  }
+
+  /* Font family utilities */
+  .font-montserrat {
+    font-family: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+  }
+  
+  .font-montserrat-light {
+    font-family: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 300;
+  }
+  
+  .font-montserrat-medium {
+    font-family: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 500;
+  }
+  
+  .font-montserrat-semibold {
+    font-family: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 600;
+  }
+  
+  .font-montserrat-bold {
+    font-family: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+  }
+  
+
+  
+  /* Logo showcase animations */
+  @keyframes scroll-x {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes scroll-x-quarter {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-25%);
+    }
+  }
+  
+  .animate-scroll-x {
+    animation: scroll-x 45s linear infinite;
+  }
+
+  .animate-scroll-x-fast {
+    animation: scroll-x 20s linear infinite;
+  }
+  .animate-scroll-x-quarter {
+    animation: scroll-x-quarter 28s linear infinite;
+  }
+}

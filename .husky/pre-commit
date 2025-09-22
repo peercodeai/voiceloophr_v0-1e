@@ -1,0 +1,27 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔒 Running pre-commit security checks..."
+
+# Run security scan
+npm run security:scan
+if [ $? -ne 0 ]; then
+  echo "❌ Security scan failed! Fix issues before committing."
+  exit 1
+fi
+
+# Run linting
+npm run lint
+if [ $? -ne 0 ]; then
+  echo "❌ Linting failed! Fix issues before committing."
+  exit 1
+fi
+
+# Run tests
+npm run test
+if [ $? -ne 0 ]; then
+  echo "❌ Tests failed! Fix issues before committing."
+  exit 1
+fi
+
+echo "✅ Pre-commit checks passed! Safe to commit."

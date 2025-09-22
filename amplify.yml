@@ -1,0 +1,22 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - echo "Installing pnpm globally..."
+        - npm install -g pnpm@latest
+        - echo "Installing dependencies with pnpm..."
+        - pnpm install --frozen-lockfile
+    build:
+      commands:
+        - echo "Building application with pnpm..."
+        - pnpm build
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+      - .next/cache/**/*
+      - pnpm-lock.yaml
