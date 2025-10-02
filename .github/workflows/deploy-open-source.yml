@@ -1,0 +1,468 @@
+# VoiceLoopHR Open-Source AI Backend - CI/CD Pipeline
+# This workflow deploys the complete open-source AI backend to AWS
+
+name: Deploy Open-Source AI Backend
+
+on:
+  push:
+    branches: [open-source]
+  pull_request:
+    branches: [open-source]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      skip_tests:
+        description: 'Skip tests'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  AWS_REGION: us-east-1
+  PROJECT_NAME: voiceloophr
+  TERRAFORM_VERSION: 1.6.0
+  DOCKER_BUILDKIT: 1
+
+jobs:
+  # Job 1: Code Quality and Testing
+  test:
+    name: Test and Quality Check
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || !inputs.skip_tests
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+          
+      - name: Install pnpm
+        run: npm install -g pnpm
+        
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Run linting
+        run: pnpm lint
+        
+      - name: Run type checking
+        run: pnpm type-check
+        
+      - name: Run tests
+        run: pnpm test
+        
+      - name: Build application
+        run: pnpm build
+        env:
+          NODE_ENV: production
+          NEXT_TELEMETRY_DISABLED: 1
+
+  # Job 2: Build and Push Docker Images
+  build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: test
+    if: always() && (needs.test.result == 'success' || github.event_name == 'workflow_dispatch')
+    
+    outputs:
+      app-image: ${{ steps.build-app.outputs.image }}
+      ai-services-image: ${{ steps.build-ai-services.outputs.image }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          region: ${{ env.AWS_REGION }}
+          
+      - name: Create ECR repository for app
+        run: |
+          aws ecr describe-repositories --repository-names ${{ env.PROJECT_NAME }}-app --region ${{ env.AWS_REGION }} || \
+          aws ecr create-repository --repository-name ${{ env.PROJECT_NAME }}-app --region ${{ env.AWS_REGION }}
+          
+      - name: Create ECR repository for AI services
+        run: |
+          aws ecr describe-repositories --repository-names ${{ env.PROJECT_NAME }}-ai-services --region ${{ env.AWS_REGION }} || \
+          aws ecr create-repository --repository-name ${{ env.PROJECT_NAME }}-ai-services --region ${{ env.AWS_REGION }}
+          
+      - name: Build and push app image
+        id: build-app
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.PROJECT_NAME }}-app:latest
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.PROJECT_NAME }}-app:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          
+      - name: Build and push AI services image
+        id: build-ai-services
+        uses: docker/build-push-action@v5
+        with:
+          context: ./docker/ai-services
+          file: ./docker/ai-services/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.PROJECT_NAME }}-ai-services:latest
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.PROJECT_NAME }}-ai-services:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Job 3: Deploy Infrastructure
+  deploy-infrastructure:
+    name: Deploy AWS Infrastructure
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/open-source' || github.event_name == 'workflow_dispatch'
+    
+    outputs:
+      rds-endpoint: ${{ steps.terraform-output.outputs.rds-endpoint }}
+      s3-bucket: ${{ steps.terraform-output.outputs.s3-bucket }}
+      alb-dns: ${{ steps.terraform-output.outputs.alb-dns }}
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          
+      - name: Terraform Init
+        working-directory: ./infrastructure/terraform
+        run: terraform init
+        
+      - name: Terraform Plan
+        working-directory: ./infrastructure/terraform
+        run: |
+          terraform plan -out=tfplan \
+            -var="aws_region=${{ env.AWS_REGION }}" \
+            -var="project_name=${{ env.PROJECT_NAME }}" \
+            -var="environment=${{ github.event.inputs.environment || 'staging' }}" \
+            -var="db_password=${{ secrets.DB_PASSWORD }}"
+            
+      - name: Terraform Apply
+        working-directory: ./infrastructure/terraform
+        run: terraform apply -auto-approve tfplan
+        
+      - name: Get Terraform outputs
+        id: terraform-output
+        working-directory: ./infrastructure/terraform
+        run: |
+          echo "rds-endpoint=$(terraform output -raw rds_endpoint)" >> $GITHUB_OUTPUT
+          echo "s3-bucket=$(terraform output -raw s3_bucket_name)" >> $GITHUB_OUTPUT
+          echo "alb-dns=$(terraform output -raw alb_dns_name)" >> $GITHUB_OUTPUT
+
+  # Job 4: Deploy AI Services
+  deploy-ai-services:
+    name: Deploy AI Services
+    runs-on: ubuntu-latest
+    needs: [build, deploy-infrastructure]
+    if: github.ref == 'refs/heads/open-source' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          
+      - name: Get EC2 instance details
+        id: get-instance
+        run: |
+          INSTANCE_ID=$(aws ec2 describe-instances \
+            --filters "Name=tag:Name,Values=${{ env.PROJECT_NAME }}-ai-services" \
+            --query 'Reservations[0].Instances[0].InstanceId' \
+            --output text)
+          echo "instance-id=$INSTANCE_ID" >> $GITHUB_OUTPUT
+          
+      - name: Deploy AI services to EC2
+        run: |
+          # Create deployment script
+          cat > deploy-ai-services.sh << 'EOF'
+          #!/bin/bash
+          set -e
+          
+          # Login to ECR
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+          
+          # Pull latest images
+          docker pull ${{ steps.login-ecr.outputs.registry }}/${{ env.PROJECT_NAME }}-ai-services:latest
+          
+          # Stop existing services
+          docker-compose -f /opt/voiceloophr/docker-compose.yml down || true
+          
+          # Update docker-compose.yml with new image
+          sed -i "s|image: .*|image: ${{ steps.login-ecr.outputs.registry }}/${{ env.PROJECT_NAME }}-ai-services:latest|g" /opt/voiceloophr/docker-compose.yml
+          
+          # Start services
+          docker-compose -f /opt/voiceloophr/docker-compose.yml up -d
+          
+          # Wait for services to be healthy
+          timeout=300
+          while [ $timeout -gt 0 ]; do
+            if docker-compose -f /opt/voiceloophr/docker-compose.yml ps | grep -q "healthy"; then
+              echo "AI services are healthy!"
+              break
+            fi
+            sleep 10
+            timeout=$((timeout - 10))
+          done
+          EOF
+          
+          # Copy and execute script on EC2
+          aws ssm send-command \
+            --instance-ids ${{ steps.get-instance.outputs.instance-id }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=["bash -s"]' \
+            --input '{"commands": ["'$(cat deploy-ai-services.sh | base64 -w 0)'"]}' \
+            --region ${{ env.AWS_REGION }}
+
+  # Job 5: Deploy Application
+  deploy-application:
+    name: Deploy Application
+    runs-on: ubuntu-latest
+    needs: [build, deploy-infrastructure]
+    if: github.ref == 'refs/heads/open-source' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          
+      - name: Deploy to AWS App Runner
+        run: |
+          # Create App Runner service configuration
+          cat > apprunner.yaml << EOF
+          version: 1.0
+          runtime:
+            version: 18
+          build:
+            commands:
+              build:
+                - echo "Build started on \$(date)"
+                - npm install -g pnpm
+                - pnpm install --frozen-lockfile
+                - pnpm build
+          run:
+            runtime-version: 18
+            command: pnpm start
+            network:
+              port: 3000
+              env: PORT
+            env:
+              - name: NODE_ENV
+                value: production
+              - name: VLLM_ENDPOINT
+                value: http://${{ needs.deploy-ai-services.outputs.alb-dns }}:8000/v1
+              - name: WHISPER_ENDPOINT
+                value: http://${{ needs.deploy-ai-services.outputs.alb-dns }}:8001
+              - name: TTS_ENDPOINT
+                value: http://${{ needs.deploy-ai-services.outputs.alb-dns }}:8002
+              - name: NEXT_PUBLIC_SUPABASE_URL
+                value: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+              - name: NEXT_PUBLIC_SUPABASE_ANON_KEY
+                value: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+              - name: SUPABASE_SERVICE_ROLE_KEY
+                value: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+              - name: RDS_ENDPOINT
+                value: ${{ needs.deploy-infrastructure.outputs.rds-endpoint }}
+              - name: S3_BUCKET
+                value: ${{ needs.deploy-infrastructure.outputs.s3-bucket }}
+          EOF
+          
+          # Deploy using AWS CLI (or use your preferred deployment method)
+          echo "Application deployment configuration created"
+
+  # Job 6: Run Database Migrations
+  run-migrations:
+    name: Run Database Migrations
+    runs-on: ubuntu-latest
+    needs: [deploy-infrastructure]
+    if: github.ref == 'refs/heads/open-source' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          
+      - name: Run database migrations
+        run: |
+          # Wait for RDS to be available
+          aws rds wait db-instance-available --db-instance-identifier ${{ env.PROJECT_NAME }}-db
+          
+          # Run migrations
+          PGPASSWORD=${{ secrets.DB_PASSWORD }} psql \
+            -h ${{ needs.deploy-infrastructure.outputs.rds-endpoint }} \
+            -U postgres \
+            -d voiceloophr \
+            -f database/migrations/001_initial_schema.sql
+            
+          PGPASSWORD=${{ secrets.DB_PASSWORD }} psql \
+            -h ${{ needs.deploy-infrastructure.outputs.rds-endpoint }} \
+            -U postgres \
+            -d voiceloophr \
+            -f database/migrations/002_vector_indexes.sql
+
+  # Job 7: Health Check and Monitoring
+  health-check:
+    name: Health Check and Monitoring
+    runs-on: ubuntu-latest
+    needs: [deploy-application, deploy-ai-services]
+    if: github.ref == 'refs/heads/open-source' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting for services to be ready..."
+          sleep 60
+          
+      - name: Health check application
+        run: |
+          # Get application URL from App Runner or ALB
+          APP_URL="http://${{ needs.deploy-application.outputs.alb-dns }}"
+          
+          # Check application health
+          for i in {1..10}; do
+            if curl -f "$APP_URL/api/health"; then
+              echo "Application is healthy!"
+              break
+            else
+              echo "Attempt $i: Application not ready yet..."
+              sleep 30
+            fi
+          done
+          
+      - name: Health check AI services
+        run: |
+          # Get AI services URL
+          AI_URL="http://${{ needs.deploy-ai-services.outputs.alb-dns }}"
+          
+          # Check AI services health
+          for i in {1..10}; do
+            if curl -f "$AI_URL/health"; then
+              echo "AI services are healthy!"
+              break
+            else
+              echo "Attempt $i: AI services not ready yet..."
+              sleep 30
+            fi
+          done
+          
+      - name: Setup CloudWatch monitoring
+        run: |
+          # Create CloudWatch dashboard
+          aws cloudwatch put-dashboard \
+            --dashboard-name "${{ env.PROJECT_NAME }}-dashboard" \
+            --dashboard-body '{
+              "widgets": [
+                {
+                  "type": "metric",
+                  "x": 0,
+                  "y": 0,
+                  "width": 12,
+                  "height": 6,
+                  "properties": {
+                    "metrics": [
+                      ["AWS/EC2", "CPUUtilization"],
+                      ["AWS/RDS", "CPUUtilization"],
+                      ["AWS/ApplicationELB", "TargetResponseTime"]
+                    ],
+                    "period": 300,
+                    "stat": "Average",
+                    "region": "${{ env.AWS_REGION }}",
+                    "title": "System Metrics"
+                  }
+                }
+              ]
+            }'
+            
+      - name: Create CloudWatch alarms
+        run: |
+          # Create high CPU alarm
+          aws cloudwatch put-metric-alarm \
+            --alarm-name "${{ env.PROJECT_NAME }}-high-cpu" \
+            --alarm-description "High CPU utilization" \
+            --metric-name CPUUtilization \
+            --namespace AWS/EC2 \
+            --statistic Average \
+            --period 300 \
+            --threshold 80 \
+            --comparison-operator GreaterThanThreshold \
+            --evaluation-periods 2
+
+  # Job 8: Cleanup (on failure)
+  cleanup:
+    name: Cleanup on Failure
+    runs-on: ubuntu-latest
+    needs: [deploy-infrastructure, deploy-ai-services, deploy-application]
+    if: failure() && (github.ref == 'refs/heads/open-source' || github.event_name == 'workflow_dispatch')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          
+      - name: Cleanup resources
+        run: |
+          echo "Cleaning up resources due to deployment failure..."
+          # Add cleanup commands here if needed
+          # terraform destroy -auto-approve

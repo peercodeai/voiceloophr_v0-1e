@@ -93,6 +93,19 @@ variable "db_password" {
   sensitive   = true
 }
 
+# Monitoring Configuration
+variable "alert_email" {
+  description = "Email address for CloudWatch alerts"
+  type        = string
+  default     = ""
+}
+
+variable "enable_detailed_monitoring" {
+  description = "Enable detailed monitoring for EC2 instances"
+  type        = bool
+  default     = true
+}
+
 # Tags
 variable "common_tags" {
   description = "Common tags to apply to all resources"

@@ -1,0 +1,105 @@
+version: '3.8'
+
+# VoiceLoopHR Application Docker Compose Configuration
+# This configuration runs the Next.js application
+
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    container_name: voiceloophr-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      - VLLM_ENDPOINT=${VLLM_ENDPOINT:-http://localhost:8000/v1}
+      - WHISPER_ENDPOINT=${WHISPER_ENDPOINT:-http://localhost:8001}
+      - TTS_ENDPOINT=${TTS_ENDPOINT:-http://localhost:8002}
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - S3_BUCKET=${S3_BUCKET}
+      - RDS_ENDPOINT=${RDS_ENDPOINT}
+      - DATABASE_URL=${DATABASE_URL}
+      - AI_SERVICE_API_KEY=${AI_SERVICE_API_KEY}
+      - AI_SERVICE_TIMEOUT=${AI_SERVICE_TIMEOUT:-30000}
+      - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
+      - GOOGLE_OAUTH_CLIENT_SECRET=${GOOGLE_OAUTH_CLIENT_SECRET}
+      - LINKEDIN_CLIENT_ID=${LINKEDIN_CLIENT_ID}
+      - LINKEDIN_CLIENT_SECRET=${LINKEDIN_CLIENT_SECRET}
+      - MICROSOFT_CLIENT_ID=${MICROSOFT_CLIENT_ID}
+      - MICROSOFT_CLIENT_SECRET=${MICROSOFT_CLIENT_SECRET}
+      - MICROSOFT_REDIRECT_URI=${MICROSOFT_REDIRECT_URI}
+    volumes:
+      - app_logs:/app/logs
+      - app_uploads:/app/uploads
+      - app_temp:/app/temp
+    depends_on:
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - voiceloophr-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: voiceloophr-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - voiceloophr-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: voiceloophr-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - voiceloophr-network
+
+volumes:
+  app_logs:
+    driver: local
+  app_uploads:
+    driver: local
+  app_temp:
+    driver: local
+  redis_data:
+    driver: local
+  nginx_logs:
+    driver: local
+
+networks:
+  voiceloophr-network:
+    driver: bridge
