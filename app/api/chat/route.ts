@@ -7,11 +7,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { message, fileId, openaiKey, contextText } = validateRequest(chatSchema, body)
 
-    // Use hardcoded API key for native intelligence if not provided
-    const finalOpenaiKey = openaiKey || process.env.OPENAI_API_KEY;
+    // Use API key from multiple sources
+    const finalOpenaiKey = openaiKey || process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY;
     if (!finalOpenaiKey) {
       return NextResponse.json(
-        createErrorResponse(500, 'OpenAI API key not configured in environment variables.', 'API_KEY_MISSING'),
+        createErrorResponse(500, 'OpenAI API key not configured. Please add your API key in settings.', 'API_KEY_MISSING', {
+          suggestion: 'Go to Settings and configure your OpenAI API key to enable chat functionality.'
+        }),
         { status: 500 }
       )
     }

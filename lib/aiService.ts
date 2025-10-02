@@ -49,7 +49,22 @@ export class AIService {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`)
+        console.error('OpenAI API Error (analyzeDocument):', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        })
+        
+        // Handle specific error cases
+        if (response.status === 401) {
+          throw new Error('Invalid OpenAI API key. Please check your API key in settings.')
+        } else if (response.status === 429) {
+          throw new Error('OpenAI API rate limit exceeded. Please try again in a moment.')
+        } else if (response.status === 500) {
+          throw new Error('OpenAI API server error. Please try again later.')
+        } else {
+          throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`)
+        }
       }
 
       const data = await response.json()
@@ -113,7 +128,23 @@ Please provide a clear, accurate answer based on the document content above.`
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`)
+        console.error('OpenAI API Error (answerQuestion):', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData,
+          question: question.substring(0, 100) + '...'
+        })
+        
+        // Handle specific error cases
+        if (response.status === 401) {
+          throw new Error('Invalid OpenAI API key. Please check your API key in settings.')
+        } else if (response.status === 429) {
+          throw new Error('OpenAI API rate limit exceeded. Please try again in a moment.')
+        } else if (response.status === 500) {
+          throw new Error('OpenAI API server error. Please try again later.')
+        } else {
+          throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`)
+        }
       }
 
       const data = await response.json()

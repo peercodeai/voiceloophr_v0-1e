@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Mic, MicOff, Volume2, Send, Loader2, MessageCircle } from "lucide-react"
+import ApiKeySetup from "./api-key-setup"
 
 interface Message {
   id: string
@@ -39,6 +40,7 @@ export default function VoiceChat({ fileId, fileName, documentText, documentName
   const [audioProgress, setAudioProgress] = useState(0)
   const [pendingAudioUrl, setPendingAudioUrl] = useState<string | null>(null)
   const [availableDocuments, setAvailableDocuments] = useState<any[]>([])
+  const [showApiKeySetup, setShowApiKeySetup] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -193,8 +195,15 @@ export default function VoiceChat({ fileId, fileName, documentText, documentName
     if (!message.trim()) return
 
     try {
-      // Use hardcoded API key for native intelligence
-      const openaiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY
+      // Get API key from multiple sources with better error handling
+      const openaiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY || 
+                       localStorage.getItem("voiceloop_openai_key") ||
+                       process.env.OPENAI_API_KEY
+      
+      if (!openaiKey) {
+        setShowApiKeySetup(true)
+        throw new Error("OpenAI API key not found. Please configure your API key below.")
+      }
 
       // Add user message if not from voice
       if (!isVoiceResponse) {
@@ -530,6 +539,21 @@ export default function VoiceChat({ fileId, fileName, documentText, documentName
           )}
         </div>
       </div>
+
+      {/* API Key Setup */}
+      {showApiKeySetup && (
+        <div className="p-4 border-b border-thin">
+          <ApiKeySetup 
+            onApiKeySet={(apiKey) => {
+              setShowApiKeySetup(false)
+              // Retry the last message if there was one
+              if (inputMessage.trim()) {
+                sendMessage(inputMessage)
+              }
+            }}
+          />
+        </div>
+      )}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
