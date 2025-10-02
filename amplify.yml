@@ -4,10 +4,14 @@ frontend:
     preBuild:
       commands:
         - echo "Installing dependencies with npm..."
-        - npm ci
+        - rm -rf node_modules package-lock.json
+        - npm install
     build:
       commands:
         - echo "Building application with npm..."
+        - export NEXT_TELEMETRY_DISABLED=1
+        - export npm_config_registry=https://registry.npmjs.org/
+        - export NPM_CONFIG_REGISTRY=https://registry.npmjs.org/
         - npm run build
   artifacts:
     baseDirectory: .next
@@ -15,6 +19,4 @@ frontend:
       - '**/*'
   cache:
     paths:
-      - node_modules/**/*
       - .next/cache/**/*
-      - package-lock.json

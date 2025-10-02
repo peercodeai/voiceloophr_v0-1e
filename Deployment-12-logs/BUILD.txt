@@ -1,0 +1,112 @@
+2025-10-02T03:51:11.565Z [INFO]: # Build environment configured with Standard build compute type: 8GiB Memory, 4vCPUs, 128GB Disk Space
+2025-10-02T03:51:11.999Z [INFO]: # Cloning repository: git@github.com:mcpmessenger/voiceloophr_v0-1e.git
+2025-10-02T03:51:12.680Z [INFO]: 
+2025-10-02T03:51:12.681Z [INFO]: Cloning into 'voiceloophr_v0-1e'...
+2025-10-02T03:51:12.681Z [INFO]: # Switching to commit: b0413346505738d4bb3b3270d5736eb980b8e6c3
+2025-10-02T03:51:12.720Z [INFO]: Note: switching to 'b0413346505738d4bb3b3270d5736eb980b8e6c3'.
+                                 You are in 'detached HEAD' state. You can look around, make experimental
+                                 changes and commit them, and you can discard any commits you make in this
+                                 state without impacting any branches by switching back to a branch.
+                                 If you want to create a new branch to retain commits you create, you may
+                                 do so (now or later) by using -c with the switch command. Example:
+                                 git switch -c <new-branch-name>
+                                 Or undo this operation with:
+                                 git switch -
+                                 Turn off this advice by setting config variable advice.detachedHead to false
+                                 HEAD is now at b041334 fix: Remove pnpm-lock.yaml and add .npmrc to force npm usage
+2025-10-02T03:51:12.732Z [INFO]: Successfully cleaned up Git credentials
+2025-10-02T03:51:12.733Z [INFO]: # Checking for Git submodules at: /codebuild/output/src4025082140/src/voiceloophr_v0-1e/.gitmodules
+2025-10-02T03:51:12.740Z [INFO]: # Retrieving environment cache...
+2025-10-02T03:51:12.783Z [WARNING]: ! Unable to write cache: {"code":"ERR_BAD_REQUEST","message":"Request failed with status code 404"})}
+2025-10-02T03:51:12.783Z [INFO]: ---- Setting Up SSM Secrets ----
+2025-10-02T03:51:12.783Z [INFO]: SSM params {"Path":"/amplify/d2foueuxz4jz59/main/","WithDecryption":true}
+2025-10-02T03:51:12.828Z [WARNING]: !Failed to set up process.env.secrets
+2025-10-02T03:51:13.677Z [INFO]: # No package override configuration found.
+2025-10-02T03:51:13.681Z [INFO]: # Retrieving cache...
+2025-10-02T03:52:43.306Z [INFO]: # Extracting cache...
+2025-10-02T03:53:40.955Z [INFO]: # Extraction completed
+2025-10-02T03:53:41.467Z [INFO]: # Retrieved cache
+2025-10-02T03:53:46.422Z [INFO]: ## Starting Backend Build
+                                 ## Checking for associated backend environment...
+                                 ## No backend environment association found, continuing...
+                                 ## Completed Backend Build
+2025-10-02T03:53:46.428Z [INFO]: ## Starting Frontend Build
+2025-10-02T03:53:46.429Z [INFO]: # Starting phase: preBuild
+                                 # Executing command: echo "Installing dependencies with npm..."
+                                 Installing dependencies with npm...
+                                 # Executing command: npm ci
+2025-10-02T03:54:28.691Z [INFO]: > my-v0-project@0.2.0 preinstall
+                                 > echo 'Using npm for package management'
+2025-10-02T03:54:28.707Z [INFO]: Using npm for package management
+2025-10-02T03:54:28.713Z [INFO]: added 817 packages, and audited 818 packages in 38s
+2025-10-02T03:54:28.713Z [INFO]: 97 packages are looking for funding
+                                 run `npm fund` for details
+2025-10-02T03:54:28.715Z [INFO]: 1 high severity vulnerability
+                                 Some issues need review, and may require choosing
+                                 a different dependency.
+                                 Run `npm audit` for details.
+2025-10-02T03:54:28.744Z [INFO]: # Completed phase: preBuild
+                                 # Starting phase: build
+2025-10-02T03:54:28.744Z [INFO]: # Executing command: echo "Building application with npm..."
+                                 Building application with npm...
+                                 # Executing command: npm run build
+2025-10-02T03:54:28.843Z [INFO]: > my-v0-project@0.2.0 build
+                                 > next build
+2025-10-02T03:54:29.527Z [INFO]: ▲ Next.js 15.5.2
+2025-10-02T03:54:29.528Z [INFO]: 
+2025-10-02T03:54:29.640Z [INFO]: Creating an optimized production build ...
+2025-10-02T03:54:30.248Z [WARNING]: ⚠ Found lockfile missing swc dependencies, run next locally to automatically patch
+2025-10-02T03:54:30.285Z [INFO]: Downloading swc package @next/swc-linux-x64-gnu... to /root/.cache/next-swc
+2025-10-02T03:54:30.288Z [WARNING]: /bin/sh: line 1: pnpm: command not found
+2025-10-02T03:54:30.294Z [WARNING]: /codebuild/output/src4025082140/src/voiceloophr_v0-1e/node_modules/next/dist/lib/helpers/get-registry.js:34
+                                    throw Object.defineProperty(new Error(`Failed to get registry from "${pkgManager}".`, {
+                                    ^
+                                    Error: Failed to get registry from "pnpm".
+                                    at getRegistry (/codebuild/output/src4025082140/src/voiceloophr_v0-1e/node_modules/next/dist/lib/helpers/get-registry.js:34:37)
+                                    at extractBinary (/codebuild/output/src4025082140/src/voiceloophr_v0-1e/node_modules/next/dist/lib/download-swc.js:90:55)
+                                    ... 2 lines matching cause stack trace ...
+                                    at async /codebuild/output/src4025082140/src/voiceloophr_v0-1e/node_modules/next/dist/build/swc/index.js:286:40 {
+                                    [cause]: Error: Command failed: pnpm config get registry
+                                    /bin/sh: line 1: pnpm: command not found
+                                    
+                                    at genericNodeError (node:internal/errors:983:15)
+                                    at wrappedFn (node:internal/errors:537:14)
+                                    at checkExecSyncError (node:child_process:915:11)
+                                    at execSync (node:child_process:987:15)
+                                    at getRegistry (/codebuild/output/src4025082140/src/voiceloophr_v0-1e/node_modules/next/dist/lib/helpers/get-registry.js:24:52)
+                                    at extractBinary (/codebuild/output/src4025082140/src/voiceloophr_v0-1e/node_modules/next/dist/lib/download-swc.js:90:55)
+                                    at async downloadNativeNextSwc (/codebuild/output/src4025082140/src/voiceloophr_v0-1e/node_modules/next/dist/lib/download-swc.js:165:9)
+                                    at async tryLoadNativeWithFallback (/codebuild/output/src4025082140/src/voiceloophr_v0-1e/node_modules/next/dist/build/swc/index.js:309:5)
+                                    at async /codebuild/output/src4025082140/src/voiceloophr_v0-1e/node_modules/next/dist/build/swc/index.js:286:40 {
+                                    status: 127,
+                                    signal: null,
+                                    output: [
+                                    null,
+                                    Buffer(0) [Uint8Array] [],
+                                    Buffer(41) [Uint8Array] [
+                                    47,  98, 105, 110,  47, 115, 104,  58,  32,
+                                    108, 105, 110, 101,  32,  49,  58,  32, 112,
+                                    110, 112, 109,  58,  32,  99, 111, 109, 109,
+                                    97, 110, 100,  32, 110, 111, 116,  32, 102,
+                                    111, 117, 110, 100,  10
+                                    ]
+                                    ],
+                                    pid: 1268,
+                                    stdout: Buffer(0) [Uint8Array] [],
+                                    stderr: Buffer(41) [Uint8Array] [
+                                    47,  98, 105, 110,  47, 115, 104,  58,  32,
+                                    108, 105, 110, 101,  32,  49,  58,  32, 112,
+                                    110, 112, 109,  58,  32,  99, 111, 109, 109,
+                                    97, 110, 100,  32, 110, 111, 116,  32, 102,
+                                    111, 117, 110, 100,  10
+                                    ]
+                                    }
+                                    }
+                                    Node.js v22.18.0
+2025-10-02T03:54:30.302Z [WARNING]: Next.js build worker exited with code: 1 and signal: null
+2025-10-02T03:54:30.321Z [ERROR]: !!! Build failed
+2025-10-02T03:54:30.321Z [INFO]: Please read more about Amplify Hosting's support for SSR frameworks to find if your build failure is related to an unsupported feature: https://docs.aws.amazon.com/amplify/latest/userguide/amplify-ssr-framework-support.html. You may also find this troubleshooting guide useful: https://docs.aws.amazon.com/amplify/latest/userguide/troubleshooting-ssr-deployment.html
+2025-10-02T03:54:30.321Z [ERROR]: !!! Error: Command failed with exit code 1
+2025-10-02T03:54:30.321Z [INFO]: # Starting environment caching...
+2025-10-02T03:54:30.321Z [INFO]: # Environment caching completed
+
