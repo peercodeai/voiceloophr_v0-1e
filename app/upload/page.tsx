@@ -1047,44 +1047,60 @@ export default function UploadPage() {
             )}
 
             {files.map((uploadedFile) => (
-                                            <Card key={uploadedFile.id} className="p-6 border-2 border-primary/20 hover:border-primary/30 transition-colors duration-200 shadow-sm hover:shadow-md">
-                 <div className="flex items-center gap-4">
-                   {/* Selection Checkbox */}
-                   <input
-                     type="checkbox"
-                     checked={selectedFiles.has(uploadedFile.id)}
-                     onChange={(e) => {
-                       if (e.target.checked) {
-                         setSelectedFiles(prev => new Set([...prev, uploadedFile.id]))
-                       } else {
-                         setSelectedFiles(prev => {
-                           const newSet = new Set(prev)
-                           newSet.delete(uploadedFile.id)
-                           return newSet
-                         })
-                       }
-                     }}
-                     className="h-4 w-4 text-primary border-primary/30 rounded focus:ring-primary/50"
-                   />
-                   
-                   <div className="text-muted-foreground">{getFileIcon(uploadedFile.file)}</div>
+                                            <Card key={uploadedFile.id} className="p-4 sm:p-6 border-2 border-primary/20 hover:border-primary/30 transition-colors duration-200 shadow-sm hover:shadow-md">
+                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                   {/* Mobile: Top row with checkbox, icon, and delete button */}
+                   <div className="flex items-center justify-between sm:justify-start gap-4">
+                     <div className="flex items-center gap-3">
+                       <input
+                         type="checkbox"
+                         checked={selectedFiles.has(uploadedFile.id)}
+                         onChange={(e) => {
+                           if (e.target.checked) {
+                             setSelectedFiles(prev => new Set([...prev, uploadedFile.id]))
+                           } else {
+                             setSelectedFiles(prev => {
+                               const newSet = new Set(prev)
+                               newSet.delete(uploadedFile.id)
+                               return newSet
+                             })
+                           }
+                         }}
+                         className="h-4 w-4 text-primary border-primary/30 rounded focus:ring-primary/50"
+                       />
+                       <div className="text-muted-foreground">{getFileIcon(uploadedFile.file)}</div>
+                     </div>
+                     
+                     {/* Delete Button - Mobile */}
+                     <Button
+                       variant="ghost"
+                       size="sm"
+                       onClick={() => setDeleteConfirmFile(uploadedFile.id)}
+                       className="text-red-500 hover:text-red-600 hover:bg-red-50 sm:hidden"
+                       title="Delete file and all associated data"
+                     >
+                       <X className="h-4 w-4" />
+                     </Button>
+                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
                       <p className="font-medium text-foreground truncate">{uploadedFile.file.name}</p>
-                      <Badge variant="secondary" className="text-xs">
-                        {(uploadedFile.file.size / 1024 / 1024).toFixed(1)} MB
-                      </Badge>
-                      {uploadedFile.fileId && (
-                        <Badge variant="outline" className="text-xs">
-                          {uploadedFile.file.type.split("/")[1]?.toUpperCase() || "FILE"}
+                      <div className="flex gap-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {(uploadedFile.file.size / 1024 / 1024).toFixed(1)} MB
                         </Badge>
-                      )}
+                        {uploadedFile.fileId && (
+                          <Badge variant="outline" className="text-xs">
+                            {uploadedFile.file.type.split("/")[1]?.toUpperCase() || "FILE"}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <Progress value={uploadedFile.progress} className="flex-1 h-2" />
-                      <div className="flex items-center gap-2 min-w-0">
+                    <div className="space-y-3">
+                      <Progress value={uploadedFile.progress} className="w-full h-2" />
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                                                  {uploadedFile.status === "uploading" && (
                            <>
                              <LogoLoader size="sm" text="Uploading..." />
@@ -1124,11 +1140,11 @@ export default function UploadPage() {
                         
                                                  {/* Processing Options - Only for completed files that need processing */}
                          {uploadedFile.status === "completed" && uploadedFile.showTextractButton && (
-                           <>
+                           <div className="flex flex-col sm:flex-row gap-2">
                              <Button
                                size="sm"
                                variant="outline"
-                               className="ml-2 font-light bg-transparent border-2 border-primary/30 hover:border-primary hover:bg-primary/5 text-primary hover:text-primary transition-all duration-200 shadow-sm hover:shadow-md"
+                               className="font-light bg-transparent border-2 border-primary/30 hover:border-primary hover:bg-primary/5 text-primary hover:text-primary transition-all duration-200 shadow-sm hover:shadow-md w-full sm:w-auto"
                                onClick={() => processWithPdfParse(uploadedFile.id)}
                              >
                                🆓 Free PDF Parser
@@ -1136,12 +1152,12 @@ export default function UploadPage() {
                              <Button
                                size="sm"
                                variant="outline"
-                               className="ml-2 font-light bg-transparent border-2 border-primary/30 hover:border-primary hover:bg-primary/5 text-primary hover:text-primary transition-all duration-200 shadow-sm hover:shadow-md"
+                               className="font-light bg-transparent border-2 border-primary/30 hover:border-primary hover:bg-primary/5 text-primary hover:text-primary transition-all duration-200 shadow-sm hover:shadow-md w-full sm:w-auto"
                                onClick={() => processWithTextract(uploadedFile.id)}
                              >
                                💰 AWS Textract (Paid)
                              </Button>
-                           </>
+                           </div>
                          )}
                         
                         {/* View Results Button - Only for completed files */}
@@ -1149,32 +1165,34 @@ export default function UploadPage() {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="ml-2 font-light bg-transparent border-2 border-primary/30 hover:border-primary hover:bg-primary/5 text-primary hover:text-primary transition-all duration-200 shadow-sm hover:shadow-md"
+                            className="font-light bg-transparent border-2 border-primary/30 hover:border-primary hover:bg-primary/5 text-primary hover:text-primary transition-all duration-200 shadow-sm hover:shadow-md w-full sm:w-auto"
                             onClick={() => viewResults(uploadedFile)}
                           >
                             View Results
                           </Button>
                         )}
                         {uploadedFile.status === "error" && (
-                          <>
-                            <AlertCircle className="h-4 w-4 text-red-500" />
-                            <span className="text-sm text-red-600">{uploadedFile.error || "Error"}</span>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                            <div className="flex items-center gap-2">
+                              <AlertCircle className="h-4 w-4 text-red-500" />
+                              <span className="text-sm text-red-600">{uploadedFile.error || "Error"}</span>
+                            </div>
                             <Button
                               size="sm"
                               variant="outline"
-                              className="ml-2 font-light bg-transparent border-2 border-primary/30 hover:border-primary hover:bg-primary/5 text-primary hover:text-primary transition-all duration-200 shadow-sm hover:shadow-md"
+                              className="font-light bg-transparent border-2 border-primary/30 hover:border-primary hover:bg-primary/5 text-primary hover:text-primary transition-all duration-200 shadow-sm hover:shadow-md w-full sm:w-auto"
                               onClick={() => retryFile(uploadedFile.id)}
                             >
                               Retry
                             </Button>
-                          </>
+                          </div>
                         )}
                       </div>
                     </div>
                   </div>
 
-                                     <div className="flex items-center gap-2">
-                     {/* Delete Button */}
+                  {/* Delete Button - Desktop */}
+                  <div className="hidden sm:flex items-center gap-2">
                      <Button
                        variant="ghost"
                        size="sm"

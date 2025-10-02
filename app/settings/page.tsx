@@ -8,8 +8,7 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ArrowLeft, Key, Save, Eye, EyeOff, LogIn, LogOut, Calendar, Cloud, CheckCircle, XCircle, Volume2 } from "lucide-react"
-import { Navigation } from "@/components/navigation"
-import { Footer } from "@/components/footer"
+import { MobileNavigation } from "@/components/mobile-navigation"
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
 import { AuthModal } from '@/components/auth-modal'
 
@@ -175,7 +174,7 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <Navigation />
+      <MobileNavigation />
 
       {/* Settings Content */}
       <section className="py-8 sm:py-12 px-4 sm:px-6">
@@ -221,19 +220,19 @@ export default function SettingsPage() {
                 </div>
               ) : (
                 <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex items-center gap-2">
                       <LogIn className="h-4 w-4 text-blue-600" />
                       <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
                         Sign in to sync your documents and settings
                       </span>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full sm:w-auto">
                       <Button 
                         variant="outline" 
                         size="sm"
                         onClick={() => handleOAuth('google')}
-                        className="text-blue-600 border-blue-200 hover:border-blue-300"
+                        className="text-blue-600 border-blue-200 hover:border-blue-300 w-full sm:w-auto"
                       >
                         <LogIn className="mr-1 h-3 w-3" />
                         Google
@@ -242,7 +241,7 @@ export default function SettingsPage() {
                         variant="outline" 
                         size="sm"
                         onClick={() => handleOAuth('linkedin_oidc')}
-                        className="text-blue-600 border-blue-200 hover:border-blue-300"
+                        className="text-blue-600 border-blue-200 hover:border-blue-300 w-full sm:w-auto"
                       >
                         <LogIn className="mr-1 h-3 w-3" />
                         LinkedIn
@@ -251,7 +250,7 @@ export default function SettingsPage() {
                         variant="outline" 
                         size="sm"
                         onClick={() => handleOAuth('azure')}
-                        className="text-blue-600 border-blue-200 hover:border-blue-300"
+                        className="text-blue-600 border-blue-200 hover:border-blue-300 w-full sm:w-auto"
                       >
                         <LogIn className="mr-1 h-3 w-3" />
                         Microsoft
@@ -629,9 +628,6 @@ export default function SettingsPage() {
       </section>
 
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
-
-      {/* Footer */}
-      <Footer />
     </div>
   )
 }
