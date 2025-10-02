@@ -2,7 +2,7 @@
   "name": "my-v0-project",
   "version": "0.2.0",
   "private": true,
-  "packageManager": "pnpm@9",
+  "packageManager": "npm@10",
   "engines": {
     "node": ">=18"
   },
@@ -23,7 +23,7 @@
     "deps:audit": "npm audit --audit-level moderate",
     "deps:outdated": "npm outdated",
     "amplify-build": "npm install && npm run build",
-    "preinstall": "npm install -g pnpm@latest || echo 'pnpm install failed, using npm'"
+    "preinstall": "echo 'Using npm for package management'"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.901.0",

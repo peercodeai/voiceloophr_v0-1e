@@ -8,7 +8,6 @@ on:
 
 env:
   NODE_VERSION: '18'
-  PNPM_VERSION: '9'
 
 jobs:
   test:
@@ -23,24 +22,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-          
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
+          cache: 'npm'
           
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
         
       - name: Run linting
-        run: pnpm lint
+        run: npm run lint
         
       - name: Run type checking
-        run: pnpm tsc --noEmit
+        run: npx tsc --noEmit
         
       - name: Run unit tests
-        run: pnpm test --coverage --watchAll=false
+        run: npm test -- --coverage --watchAll=false
         
       - name: Upload test coverage
         uses: codecov/codecov-action@v3
@@ -63,18 +57,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-          
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
+          cache: 'npm'
           
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
         
       - name: Build application
-        run: pnpm build
+        run: npm run build
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
@@ -101,16 +90,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
         
       - name: Run security audit
-        run: pnpm audit --audit-level moderate
+        run: npm audit --audit-level moderate
         
       - name: Check for secrets
         uses: gitleaks/gitleaks-action@v2
