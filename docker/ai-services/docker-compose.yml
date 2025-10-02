@@ -1,0 +1,149 @@
+version: '3.8'
+
+# VoiceLoopHR AI Services Docker Compose Configuration
+# This configuration runs the open-source AI services locally or on EC2
+
+services:
+  vllm:
+    image: vllm/vllm-openai:latest
+    container_name: voiceloophr-vllm
+    ports:
+      - "8000:8000"
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - VLLM_HOST=0.0.0.0
+      - VLLM_PORT=8000
+    command: >
+      --model microsoft/DialoGPT-medium
+      --host 0.0.0.0
+      --port 8000
+      --tensor-parallel-size 1
+      --gpu-memory-utilization 0.8
+      --max-model-len 2048
+      --trust-remote-code
+    volumes:
+      - vllm_cache:/root/.cache
+      - ./models:/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  whisper:
+    image: openai/whisper:latest
+    container_name: voiceloophr-whisper
+    ports:
+      - "8001:8001"
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - WHISPER_MODEL=base
+    command: >
+      python -m flask run --host=0.0.0.0 --port=8001
+    volumes:
+      - whisper_cache:/root/.cache
+      - ./audio:/audio
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  tts:
+    image: coqui/tts:latest
+    container_name: voiceloophr-tts
+    ports:
+      - "8002:8002"
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - TTS_MODEL=tts_models/multilingual/multi-dataset/xtts_v2
+    command: >
+      python -m tts.server --host 0.0.0.0 --port 8002
+    volumes:
+      - tts_cache:/root/.local/share/tts
+      - ./audio:/audio
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  nginx:
+    image: nginx:alpine
+    container_name: voiceloophr-ai-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - vllm
+      - whisper
+      - tts
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  health-check:
+    image: curlimages/curl:latest
+    container_name: voiceloophr-health-check
+    depends_on:
+      - vllm
+      - whisper
+      - tts
+    command: >
+      sh -c "
+        echo 'Waiting for AI services to start...' &&
+        sleep 30 &&
+        echo 'Checking vLLM service...' &&
+        curl -f http://vllm:8000/health || exit 1 &&
+        echo 'Checking Whisper service...' &&
+        curl -f http://whisper:8001/health || exit 1 &&
+        echo 'Checking TTS service...' &&
+        curl -f http://tts:8002/health || exit 1 &&
+        echo 'All AI services are healthy!'
+      "
+    restart: "no"
+
+volumes:
+  vllm_cache:
+    driver: local
+  whisper_cache:
+    driver: local
+  tts_cache:
+    driver: local
+
+networks:
+  default:
+    name: voiceloophr-ai-network

@@ -87,11 +87,17 @@ VoiceLoop HR is a cutting-edge document analysis platform that combines AI-power
 - **Lucide React** - Beautiful icons
 - **React PDF** - PDF viewing capabilities
 
-### **Backend**
+### **Backend (Open-Source AI)**
 - **Next.js API Routes** - Serverless API endpoints
 - **Supabase** - Database and authentication
 - **PostgreSQL** - Relational database with pg_vector extension
-- **OpenAI API** - GPT-4 and Whisper integration
+- **vLLM** - High-performance LLM serving on AWS EC2
+- **OpenAI Whisper** - Local speech-to-text processing
+- **Coqui TTS** - Open-source text-to-speech synthesis
+- **AWS Infrastructure** - Scalable cloud deployment
+
+### **Backend (OpenAI API - Legacy)**
+- **OpenAI API** - GPT-4 and Whisper integration (deprecated in open-source branch)
 
 ### **Document Processing**
 - **Mammoth** - DOCX parsing
@@ -106,9 +112,44 @@ VoiceLoop HR is a cutting-edge document analysis platform that combines AI-power
 - **TypeScript** - Static type checking
 - **Hot Reload** - Development efficiency
 
+## 🌟 Open-Source AI Backend
+
+VoiceLoopHR now supports a complete open-source AI backend that eliminates dependency on external API services. This self-hosted solution provides:
+
+### **Open-Source AI Components**
+- **🤖 Local LLM Inference** - vLLM-powered language models on AWS EC2
+- **🎤 Speech-to-Text** - OpenAI Whisper running locally
+- **🔊 Text-to-Speech** - Coqui TTS (XTTS-v2) for voice synthesis
+- **☁️ AWS Infrastructure** - Scalable, cost-optimized cloud deployment
+- **🔒 Data Privacy** - Complete control over your data and AI models
+
+### **Deployment Options**
+
+#### **Option 1: Open-Source AI Backend (Recommended)**
+- Self-hosted AI services on AWS
+- No external API dependencies
+- Complete data privacy and control
+- Cost-optimized with spot instances
+- See [AWS Infrastructure Guide](docs/aws-infrastructure.md)
+
+#### **Option 2: OpenAI API (Legacy)**
+- Quick setup with OpenAI API keys
+- Limited to API quotas and costs
+- External data processing
+- See [OpenAI Setup Guide](#openai-setup)
+
 ## 🚀 Quick Start
 
 ### Prerequisites
+
+#### **For Open-Source AI Backend:**
+- Node.js 18+ 
+- pnpm package manager
+- AWS Account with EC2 access
+- Docker and Docker Compose
+- Supabase account (optional for guest mode)
+
+#### **For OpenAI API (Legacy):**
 - Node.js 18+ 
 - pnpm package manager
 - OpenAI API key
@@ -122,12 +163,49 @@ VoiceLoop HR is a cutting-edge document analysis platform that combines AI-power
    cd voiceloophr
    ```
 
-2. **Install dependencies**
+2. **Choose your deployment branch**
+   ```bash
+   # For Open-Source AI Backend (Recommended)
+   git checkout open-source-ai
+   
+   # For OpenAI API (Legacy)
+   git checkout main
+   ```
+
+3. **Install dependencies**
    ```bash
    pnpm install
    ```
 
-3. **Environment Setup**
+4. **Environment Setup**
+
+   **For Open-Source AI Backend:**
+   ```bash
+   cp .env.example .env.local
+   ```
+   
+   Configure your environment variables:
+   ```env
+   # AWS Configuration
+   AWS_ACCESS_KEY_ID=your_aws_access_key
+   AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+   AWS_REGION=us-east-1
+   
+   # AI Service Endpoints
+   VLLM_ENDPOINT=http://your-ec2-instance:8000/v1
+   WHISPER_ENDPOINT=http://your-ec2-instance:8001
+   TTS_ENDPOINT=http://your-ec2-instance:8002
+   
+   # Supabase Configuration
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+   
+   # App Configuration
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   ```
+
+   **For OpenAI API (Legacy):**
    ```bash
    cp .env.example .env.local
    ```
@@ -154,12 +232,12 @@ VoiceLoop HR is a cutting-edge document analysis platform that combines AI-power
    NEXT_PUBLIC_APP_URL=http://localhost:3000
    ```
 
-4. **Start Development Server**
+5. **Start Development Server**
    ```bash
    pnpm dev
    ```
 
-5. **Open in Browser**
+6. **Open in Browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
 ## 🏗️ Recent Architecture Improvements
@@ -495,7 +573,51 @@ Microsoft env vars:
 
 ## 🚀 Deployment
 
-### **Vercel Deployment (Recommended)**
+### **AWS Open-Source AI Deployment (Recommended)**
+
+#### **Prerequisites**
+- AWS Account with EC2, RDS, and S3 access
+- AWS CLI configured with appropriate permissions
+- Terraform or AWS CloudFormation
+- Docker and Docker Compose
+
+#### **Quick AWS Setup**
+1. **Deploy Infrastructure**
+   ```bash
+   # Clone the open-source branch
+   git checkout open-source-ai
+   
+   # Deploy AWS infrastructure
+   cd infrastructure/terraform
+   terraform init
+   terraform plan
+   terraform apply
+   ```
+
+2. **Deploy AI Services**
+   ```bash
+   # Deploy containerized AI services
+   cd docker/ai-services
+   docker-compose up -d
+   ```
+
+3. **Deploy Application**
+   ```bash
+   # Deploy Next.js application
+   cd ../app
+   docker-compose up -d
+   ```
+
+#### **Detailed AWS Setup**
+See [AWS Infrastructure Guide](docs/aws-infrastructure.md) for comprehensive deployment instructions including:
+- EC2 G5 instances for GPU-accelerated inference
+- RDS PostgreSQL with pg_vector extension
+- S3 for document storage
+- Application Load Balancer configuration
+- Auto Scaling Groups setup
+- Cost optimization strategies
+
+### **Vercel Deployment (OpenAI API)**
 1. Connect your GitHub repository to Vercel
 2. Configure environment variables in Vercel dashboard
 3. Deploy automatically on push to main branch
