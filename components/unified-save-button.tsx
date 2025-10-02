@@ -35,7 +35,13 @@ export function UnifiedSaveButton({
 
   const handleUnifiedSave = async () => {
     if (!extractedText) {
-      setErrorMessage('No text content available to save')
+      setErrorMessage('No text content available to save. Please ensure the document has been processed successfully.')
+      setSaveStatus('error')
+      return
+    }
+
+    if (!userId) {
+      setErrorMessage('Authentication required. Please sign in to save documents to your account.')
       setSaveStatus('error')
       return
     }
@@ -86,15 +92,52 @@ export function UnifiedSaveButton({
         onSaveComplete?.()
       } else {
         const errors = []
-        if (!databaseSuccess) errors.push('Database save failed')
-        if (!ragSuccess) errors.push('Semantic search save failed')
-        setErrorMessage(errors.join(', '))
+        let detailedErrors = []
+        
+        if (!databaseSuccess) {
+          errors.push('Database save failed')
+          if (databaseResponse.status === 401) {
+            detailedErrors.push('Authentication expired - please sign in again')
+          } else if (databaseResponse.status === 413) {
+            detailedErrors.push('Document too large - try with a smaller file')
+          } else if (databaseResponse.status >= 500) {
+            detailedErrors.push('Server error - please try again later')
+          } else {
+            detailedErrors.push(databaseResult.error || 'Database connection failed')
+          }
+        }
+        
+        if (!ragSuccess) {
+          errors.push('Semantic search setup failed')
+          if (ragResponse.status === 401) {
+            detailedErrors.push('Authentication required for semantic search')
+          } else if (ragResponse.status >= 500) {
+            detailedErrors.push('Search service temporarily unavailable')
+          } else {
+            detailedErrors.push(ragResult.error || 'Search indexing failed')
+          }
+        }
+        
+        const errorMessage = detailedErrors.length > 0 ? detailedErrors.join('. ') : errors.join(', ')
+        setErrorMessage(errorMessage)
         setSaveStatus('error')
       }
 
     } catch (error) {
       console.error('Unified save error:', error)
-      setErrorMessage('Failed to save document')
+      let errorMessage = 'Failed to save document'
+      
+      if (error instanceof Error) {
+        if (error.message.includes('fetch')) {
+          errorMessage = 'Network error - please check your internet connection and try again'
+        } else if (error.message.includes('timeout')) {
+          errorMessage = 'Request timed out - please try again with a smaller document'
+        } else {
+          errorMessage = `Save failed: ${error.message}`
+        }
+      }
+      
+      setErrorMessage(errorMessage)
       setSaveStatus('error')
     } finally {
       setIsSaving(false)

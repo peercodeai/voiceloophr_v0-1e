@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { Upload, FileText, File, Music, Video, X, CheckCircle, AlertCircle, ArrowLeft } from "lucide-react"
 import { LogoLoader } from "@/components/logo-loader"
-import { Navigation } from "@/components/navigation"
+import { MobileNavigation } from "@/components/mobile-navigation"
 import GoogleDriveImport from "@/components/google-drive-import"
 import { getSupabaseBrowser } from "@/lib/supabase-browser"
 interface UploadedFile {
@@ -929,7 +929,7 @@ export default function UploadPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <Navigation />
+      <MobileNavigation />
 
       <div className="container mx-auto px-6 py-12 max-w-4xl">
         <div className="text-center mb-8">

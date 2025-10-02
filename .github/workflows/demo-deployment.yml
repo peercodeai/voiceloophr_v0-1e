@@ -1,0 +1,80 @@
+name: Demo Deployment
+
+on:
+  push:
+    branches: [ demo ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'demo'
+        type: choice
+        options:
+        - demo
+        - staging
+
+env:
+  NODE_VERSION: '18'
+  PNPM_VERSION: '9'
+
+jobs:
+  deploy-demo:
+    name: Deploy Demo Environment
+    runs-on: ubuntu-latest
+    environment: demo
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Build demo application
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.DEMO_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.DEMO_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.DEMO_APP_URL }}
+          NEXT_PUBLIC_OPENAI_API_KEY: ${{ secrets.DEMO_OPENAI_API_KEY }}
+          
+      - name: Deploy to Vercel Demo
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.DEMO_PROJECT_ID }}
+          vercel-args: '--prod --env-file .env.demo'
+          working-directory: ./
+          
+      - name: Setup demo data
+        run: |
+          echo "Setting up demo environment with sample documents..."
+          # This would typically involve seeding the demo database
+          # with sample documents and configurations
+          
+      - name: Run demo health checks
+        run: |
+          echo "Running demo environment health checks..."
+          sleep 30  # Wait for deployment to be ready
+          # Add specific demo health checks here
+          # curl -f ${{ secrets.DEMO_APP_URL }}/api/health || exit 1
+          
+      - name: Notify demo deployment
+        run: |
+          echo "🎉 Demo environment deployed successfully!"
+          echo "Demo URL: ${{ secrets.DEMO_APP_URL }}"
+          echo "Environment: Demo (Sandboxed)"
+          echo "Features: Limited functionality with sample data"

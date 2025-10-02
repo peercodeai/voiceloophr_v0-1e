@@ -3,7 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { LayoutDashboard, Settings, Calendar } from "lucide-react"
+import { LayoutDashboard, Settings, Calendar, Menu, X, User, LogOut, Upload, Search } from "lucide-react"
 import { useEffect, useMemo, useState } from 'react'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -20,6 +20,7 @@ export function Navigation({
   const [userId, setUserId] = useState<string | null>(null)
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     const loadUser = async () => {

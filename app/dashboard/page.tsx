@@ -27,7 +27,8 @@ import {
   AlertCircle,
 } from "lucide-react"
 import { SophisticatedLoader } from "@/components/sophisticated-loader"
-import { Navigation } from "@/components/navigation"
+import { MobileNavigation } from "@/components/mobile-navigation"
+import EnhancedGuestMode from "@/components/enhanced-guest-mode"
 import { FullCalendar } from "@/components/full-calendar"
 import VoiceChat from "@/components/voice-chat"
 import { Footer } from "@/components/footer"
@@ -451,7 +452,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <Navigation showDashboardButton={false} />
+      <MobileNavigation showDashboardButton={false} />
 
 
 
@@ -463,6 +464,11 @@ export default function DashboardPage() {
           <p className="text-muted-foreground font-montserrat-light">
             Manage your documents and track your AI processing activity
           </p>
+        </div>
+
+        {/* Enhanced Guest Mode */}
+        <div className="mb-8">
+          <EnhancedGuestMode />
         </div>
 
         {/* Voice Chat (open by default) */}

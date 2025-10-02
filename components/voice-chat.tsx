@@ -327,8 +327,26 @@ export default function VoiceChat({ fileId, fileName, documentText, documentName
       const provider = (localStorage.getItem('voiceloop_tts_provider') as 'auto' | 'elevenlabs' | 'openai' | null) || 'auto'
       const elevenlabsKey = localStorage.getItem("voiceloop_elevenlabs_key")
       const elevenlabsVoice = localStorage.getItem('voiceloop_elevenlabs_voice') || ''
+      const openaiKey = localStorage.getItem("voiceloop_openai_key")
 
       setIsSpeaking(true)
+
+      // Check if any TTS providers are configured
+      const hasElevenLabs = !!elevenlabsKey
+      const hasOpenAI = !!openaiKey || !!process.env.NEXT_PUBLIC_OPENAI_API_KEY
+      
+      if (!hasElevenLabs && !hasOpenAI && provider !== 'browser') {
+        // Show helpful message about TTS configuration
+        const configMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          type: "assistant",
+          content: "🔊 **Text-to-Speech Setup Required**\n\nTo use voice features, please configure TTS in Settings:\n\n• **ElevenLabs**: Get free API key at [elevenlabs.io](https://elevenlabs.io)\n• **OpenAI TTS**: Uses your existing OpenAI API key\n• **Browser TTS**: Uses your device's built-in speech synthesis\n\nGo to Settings → TTS Configuration to set up voice features.",
+          timestamp: new Date(),
+        }
+        setMessages((prev) => [...prev, configMessage])
+        setIsSpeaking(false)
+        return
+      }
 
       // Helper to play blob
       const playBlob = async (blob: Blob) => {
@@ -437,14 +455,29 @@ export default function VoiceChat({ fileId, fileName, documentText, documentName
       setAudioProgress(0)
       setCurrentAudio(null)
       
-      // Show error message to user
-      const errorMessage: Message = {
+      // Provide helpful error messages based on the error type
+      let errorContent = "🔊 **Voice playback failed**"
+      const errorMessage = error instanceof Error ? error.message : (typeof error === 'string' ? error : 'Unknown error')
+      
+      if (errorMessage.includes('API key')) {
+        errorContent += "\n\n**API Key Issue**: Please check your TTS API keys in Settings:\n• Verify ElevenLabs API key is valid\n• Ensure OpenAI API key is configured\n• Try using Browser TTS as fallback"
+      } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+        errorContent += "\n\n**Network Issue**: Check your internet connection and try again.\n• Voice services require stable internet\n• Try refreshing the page if issues persist"
+      } else if (errorMessage.includes('browser') || errorMessage.includes('SpeechSynthesis')) {
+        errorContent += "\n\n**Browser Compatibility**: Your browser may not support voice features.\n• Try Chrome, Firefox, or Safari\n• Enable audio permissions\n• Check browser audio settings"
+      } else {
+        errorContent += `\n\n**Error**: ${errorMessage}\n\n**Troubleshooting**:\n• Check Settings → TTS Configuration\n• Try switching TTS providers\n• Refresh the page and try again`
+      }
+      
+      errorContent += "\n\n💡 **Tip**: Go to Settings to configure voice providers or use the text interface."
+      
+      const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
         type: "assistant",
-        content: `TTS Error: ${error instanceof Error ? error.message : (typeof error === 'string' ? error : 'Failed to generate speech')}`,
+        content: errorContent,
         timestamp: new Date(),
       }
-      setMessages((prev) => [...prev, errorMessage])
+      setMessages((prev) => [...prev, errorMsg])
     }
   }
 
@@ -484,7 +517,7 @@ export default function VoiceChat({ fileId, fileName, documentText, documentName
   }
 
   return (
-    <Card className="flex flex-col h-[600px] border-thin">
+    <Card className="flex flex-col h-[500px] sm:h-[600px] border-thin">
       {/* Header */}
       <div className="p-4 border-b border-thin">
         <div className="flex items-center gap-3">
@@ -536,13 +569,13 @@ export default function VoiceChat({ fileId, fileName, documentText, documentName
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-thin">
+      <div className="p-3 sm:p-4 border-t border-thin">
         <form onSubmit={handleSubmit} className="flex gap-2">
           <Input
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             placeholder="Type your message or use voice..."
-            className="flex-1 font-light"
+            className="flex-1 font-light text-sm sm:text-base"
             disabled={isProcessing}
           />
 

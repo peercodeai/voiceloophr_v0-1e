@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ArrowLeft, Key, Save, Eye, EyeOff, LogIn, LogOut, Calendar, Cloud, CheckCircle, XCircle } from "lucide-react"
+import { ArrowLeft, Key, Save, Eye, EyeOff, LogIn, LogOut, Calendar, Cloud, CheckCircle, XCircle, Volume2 } from "lucide-react"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
@@ -466,23 +466,96 @@ export default function SettingsPage() {
 
             {/* TTS Settings */}
             <Card className="p-6 border-thin">
-              <h3 className="text-lg font-light mb-2">Text-to-Speech</h3>
-              <p className="text-sm text-muted-foreground mb-4">Choose provider and voice for spoken responses.</p>
-              <div className="space-y-3">
-                <Label className="text-sm font-light">Provider</Label>
-                <div className="flex gap-3">
-                  <label className="flex items-center gap-2 text-sm">
-                    <input type="radio" name="tts" value="auto" checked={ttsProvider === 'auto'} onChange={() => setTtsProvider('auto')} />
-                    Auto (prefer ElevenLabs, fallback to OpenAI)
-                  </label>
-                  <label className="flex items-center gap-2 text-sm">
-                    <input type="radio" name="tts" value="elevenlabs" checked={ttsProvider === 'elevenlabs'} onChange={() => setTtsProvider('elevenlabs')} />
-                    ElevenLabs
-                  </label>
-                  <label className="flex items-center gap-2 text-sm">
-                    <input type="radio" name="tts" value="openai" checked={ttsProvider === 'openai'} onChange={() => setTtsProvider('openai')} />
-                    OpenAI
-                  </label>
+              <div className="flex items-center gap-3 mb-4">
+                <Volume2 className="h-5 w-5 text-accent" />
+                <h3 className="text-xl font-montserrat-light">Text-to-Speech Configuration</h3>
+              </div>
+              <p className="text-sm text-muted-foreground font-montserrat-light mb-4">
+                Configure voice providers for AI responses. Choose the best option based on your needs and API keys.
+              </p>
+              
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm font-montserrat-light">Voice Provider</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
+                    <label className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
+                      ttsProvider === 'auto' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                    }`}>
+                      <input 
+                        type="radio" 
+                        name="tts" 
+                        value="auto" 
+                        checked={ttsProvider === 'auto'} 
+                        onChange={() => setTtsProvider('auto')} 
+                        className="mt-1"
+                      />
+                      <div>
+                        <div className="font-medium text-sm">Auto (Recommended)</div>
+                        <div className="text-xs text-muted-foreground">Tries ElevenLabs first, falls back to OpenAI</div>
+                      </div>
+                    </label>
+                    
+                    <label className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
+                      ttsProvider === 'elevenlabs' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                    }`}>
+                      <input 
+                        type="radio" 
+                        name="tts" 
+                        value="elevenlabs" 
+                        checked={ttsProvider === 'elevenlabs'} 
+                        onChange={() => setTtsProvider('elevenlabs')} 
+                        className="mt-1"
+                      />
+                      <div>
+                        <div className="font-medium text-sm">ElevenLabs</div>
+                        <div className="text-xs text-muted-foreground">High-quality voices, requires API key</div>
+                      </div>
+                    </label>
+                    
+                    <label className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
+                      ttsProvider === 'openai' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                    }`}>
+                      <input 
+                        type="radio" 
+                        name="tts" 
+                        value="openai" 
+                        checked={ttsProvider === 'openai'} 
+                        onChange={() => setTtsProvider('openai')} 
+                        className="mt-1"
+                      />
+                      <div>
+                        <div className="font-medium text-sm">OpenAI</div>
+                        <div className="text-xs text-muted-foreground">Uses your existing OpenAI API key</div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Status indicators */}
+                <div className="flex flex-wrap gap-2">
+                  {elevenlabsKey ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                      <CheckCircle className="h-3 w-3" />
+                      ElevenLabs configured
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                      <XCircle className="h-3 w-3" />
+                      ElevenLabs not configured
+                    </span>
+                  )}
+                  
+                  {(openaiKey || process.env.NEXT_PUBLIC_OPENAI_API_KEY) ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                      <CheckCircle className="h-3 w-3" />
+                      OpenAI configured
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                      <XCircle className="h-3 w-3" />
+                      OpenAI not configured
+                    </span>
+                  )}
                 </div>
 
                 <div className="space-y-2">
