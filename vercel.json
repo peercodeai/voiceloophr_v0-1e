@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npm install && npm run build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "github": {
+    "silent": false
+  },
+  "env": {
+    "NEXT_PUBLIC_DISABLE_AUTH": "false"
+  }
+}
