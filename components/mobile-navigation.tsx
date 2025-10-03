@@ -3,7 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { LayoutDashboard, Settings, Calendar, Menu, X, User, LogOut, Upload, Search, MessageCircle, Home } from "lucide-react"
+import { LayoutDashboard, Settings, Calendar, Menu, X, User, LogOut, Upload, Search, MessageCircle, Home, Files } from "lucide-react"
 import { useEffect, useMemo, useState } from 'react'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -244,10 +244,22 @@ export function MobileNavigation({
                     <Link href="/chat" onClick={() => setIsMobileMenuOpen(false)}>
                       <MessageCircle className="h-5 w-5 mr-3" />
                       AI Voice Chat
-                    </Link>
-                  </Button>
-                  
-                  <div className="border-t border-border/50 my-2"></div>
+                      </Link>
+                    </Button>
+
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="font-montserrat-light justify-start h-12 text-left" 
+                      asChild
+                    >
+                      <Link href="/document-query" onClick={() => setIsMobileMenuOpen(false)}>
+                        <Files className="h-5 w-5 mr-3" />
+                        Document Query
+                      </Link>
+                    </Button>
+                    
+                    <div className="border-t border-border/50 my-2"></div>
                   
                   {userId ? (
                     <>
