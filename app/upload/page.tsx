@@ -114,7 +114,9 @@ export default function UploadPage() {
     try {
       // Check API key availability first
       const openaiKey = localStorage.getItem("voiceloop_openai_key")
-      if (!openaiKey) {
+      const isDemoMode = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true'
+      
+      if (!openaiKey && !isDemoMode) {
         console.warn("OpenAI API key not found - file will be uploaded but not processed with AI")
         // Continue with upload but mark for manual processing
       }
@@ -201,7 +203,7 @@ export default function UploadPage() {
       await new Promise(resolve => setTimeout(resolve, 500))
 
       // Check if we have the OpenAI key for AI processing
-      if (!openaiKey) {
+      if (!openaiKey && !isDemoMode) {
         // Mark as completed without AI processing if no key
         setFiles((prev) => prev.map((f) => f.id === fileId ? { 
           ...f, 
