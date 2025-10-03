@@ -1027,7 +1027,7 @@ export default function UploadPage() {
                </div>
             
             {/* API Key Status */}
-            {!localStorage.getItem("voiceloop_openai_key") && (
+            {!localStorage.getItem("voiceloop_openai_key") && process.env.NEXT_PUBLIC_DISABLE_AUTH !== 'true' && (
               <Card className="p-4 border-2 border-yellow-200 bg-yellow-50">
                 <div className="flex items-center gap-3">
                   <AlertCircle className="h-5 w-5 text-yellow-600" />
