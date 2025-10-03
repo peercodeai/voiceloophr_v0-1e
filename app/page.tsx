@@ -17,6 +17,12 @@ export default function HomePage() {
   const altWords = ["Ideas", "Summaries", "Conversations", "Appointments", "Insights"]
 
   useEffect(() => {
+    // Disable authentication for demo
+    if (process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true') {
+      setUserId('demo-user')
+      return
+    }
+    
     const loadUser = async () => {
       try {
         const supabase = getSupabaseBrowser()
@@ -34,6 +40,12 @@ export default function HomePage() {
   }, [])
 
   const handleOAuth = async (provider: 'google' | 'linkedin_oidc' | 'azure') => {
+    // Disabled for demo
+    if (process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true') {
+      alert('Authentication disabled for demo. You can use the app directly.')
+      return
+    }
+    
     try {
       const supabase = getSupabaseBrowser()
       if (!supabase) return
@@ -59,6 +71,12 @@ export default function HomePage() {
   }
 
   const handleEmailMagic = async () => {
+    // Disabled for demo
+    if (process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true') {
+      alert('Authentication disabled for demo. You can use the app directly.')
+      return
+    }
+    
     const email = prompt('Enter your email for a magic link')
     if (!email) return
     try {
