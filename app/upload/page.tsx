@@ -94,14 +94,8 @@ export default function UploadPage() {
     if (!uploadedFile) return
 
     try {
-      // Check API key availability first
-      const openaiKey = localStorage.getItem("voiceloop_openai_key")
-      const isDemoMode = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true'
-      
-      if (!openaiKey && !isDemoMode) {
-        console.warn("OpenAI API key not found - file will be uploaded but not processed with AI")
-        // Continue with upload but mark for manual processing
-      }
+      // Note: OpenAI API key is now handled by server environment variables
+      // No need to check localStorage - server will use OPENAI_API_KEY from Vercel
 
       // Upload file
       const formData = new FormData()
@@ -368,7 +362,7 @@ export default function UploadPage() {
         },
         body: JSON.stringify({
           fileId: uploadResult.fileId,
-          openaiKey,
+          // Don't send openaiKey - let the server use environment variable
         }),
         signal: controller.signal,
       })

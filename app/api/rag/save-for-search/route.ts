@@ -9,8 +9,7 @@ export async function POST(request: NextRequest) {
       documentId, 
       fileName, 
       text, 
-      userId, 
-      openaiKey 
+      userId
     } = body
 
     if (!documentId || !fileName || !text) {
@@ -35,13 +34,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Process document for semantic search
+    // Process document for semantic search using server environment variable
     const result = await RAGService.processDocumentForSearch(
       documentId,
       fileName,
       text,
       userId,
-      openaiKey
+      process.env.OPENAI_API_KEY
     )
 
     if (!result.success) {

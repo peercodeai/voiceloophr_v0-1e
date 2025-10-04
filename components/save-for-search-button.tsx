@@ -29,12 +29,9 @@ export default function SaveForSearchButton({
   const [isSaving, setIsSaving] = useState(false)
   const [hasOpenAIKey, setHasOpenAIKey] = useState(false)
 
-  // Check if OpenAI key is available
+  // OpenAI key is now handled by server environment variables
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const openaiKey = localStorage.getItem('voiceloop_openai_key')
-      setHasOpenAIKey(!!openaiKey)
-    }
+    setHasOpenAIKey(true) // Assume server has the key configured
   }, [])
 
   const handleSaveForSearch = async () => {
@@ -48,8 +45,7 @@ export default function SaveForSearchButton({
     setIsSaving(true)
     
     try {
-      const openaiKey = localStorage.getItem('voiceloop_openai_key')
-      
+      // Don't send openaiKey - server will use environment variable
       const response = await fetch('/api/rag/save-for-search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -57,8 +53,8 @@ export default function SaveForSearchButton({
           documentId,
           fileName,
           text,
-          userId,
-          openaiKey
+          userId
+          // openaiKey removed - server uses OPENAI_API_KEY environment variable
         })
       })
 
