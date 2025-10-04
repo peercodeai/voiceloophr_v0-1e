@@ -1,10 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getSupabase() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Missing Supabase environment variables')
+  }
+  
+  return createClient(supabaseUrl, supabaseKey)
+}
 
 // GET /api/calendar/[id] - Fetch a single calendar event
 export async function GET(
@@ -14,6 +20,7 @@ export async function GET(
   try {
     const { id } = params
 
+    const supabase = getSupabase()
     const { data, error } = await supabase
       .from('calendar_events')
       .select(`
@@ -80,6 +87,7 @@ export async function PUT(
       updateData[key] === undefined && delete updateData[key]
     )
 
+    const supabase = getSupabase()
     const { data, error } = await supabase
       .from('calendar_events')
       .update(updateData)
@@ -112,6 +120,7 @@ export async function DELETE(
   try {
     const { id } = params
 
+    const supabase = getSupabase()
     const { error } = await supabase
       .from('calendar_events')
       .delete()

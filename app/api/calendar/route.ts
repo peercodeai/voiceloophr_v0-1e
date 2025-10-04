@@ -1,10 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getSupabase() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Missing Supabase environment variables')
+  }
+  
+  return createClient(supabaseUrl, supabaseKey)
+}
 
 // GET /api/calendar - Fetch all calendar events
 export async function GET(request: NextRequest) {
@@ -14,6 +20,7 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get('end_date')
     const eventType = searchParams.get('event_type')
 
+    const supabase = getSupabase()
     let query = supabase
       .from('calendar_events')
       .select(`
@@ -90,6 +97,7 @@ export async function POST(request: NextRequest) {
       status: status || 'scheduled'
     }
 
+    const supabase = getSupabase()
     const { data, error } = await supabase
       .from('calendar_events')
       .insert(eventData)

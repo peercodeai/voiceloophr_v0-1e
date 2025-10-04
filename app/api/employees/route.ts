@@ -1,10 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getSupabase() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Missing Supabase environment variables')
+  }
+  
+  return createClient(supabaseUrl, supabaseKey)
+}
 
 // GET /api/employees - Fetch all employees or search employees
 export async function GET(request: NextRequest) {
@@ -15,6 +21,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')
 
+    const supabase = getSupabase()
     let query = supabase
       .from('employees')
       .select('*')
@@ -70,6 +77,7 @@ export async function POST(request: NextRequest) {
       skills: skills || []
     }
 
+    const supabase = getSupabase()
     const { data, error } = await supabase
       .from('employees')
       .insert(employeeData)
