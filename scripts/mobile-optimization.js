@@ -86,7 +86,6 @@ console.log('');
 // Check for mobile-specific files
 const mobileFiles = [
   'components/mobile-navigation.tsx',
-  'components/enhanced-guest-mode.tsx',
   'app/page.tsx', // Updated with mobile optimizations
   'app/dashboard/page.tsx', // Updated with mobile nav
   'components/voice-chat.tsx' // Updated with mobile sizing

@@ -1,81 +1,141 @@
-# VoiceLoop HR - Intelligent Document Analysis Platform
+# VoiceLoop HR - Simplified HR Management Platform
 
 ![VoiceLoop HR Logo](public/images/voiceloop-logo.png)
 
-VoiceLoop HR is a cutting-edge document analysis platform that combines AI-powered text extraction, semantic search, and intelligent document processing to revolutionize how organizations handle their HR documents and content.
+VoiceLoop HR is a streamlined HR management platform that combines intelligent document analysis, semantic search, employee database management, and interview scheduling in a unified interface.
 
 ## 🚀 Features
 
-### 📄 **Multi-Format Document Support**
-- **PDF Documents** - Full PDF parsing with visual viewer
-- **Microsoft Office** - Word (.docx), Excel (.xlsx), PowerPoint (.pptx)
-- **Text Files** - Plain text, markdown, and more
-- **Media Files** - Images, audio, and video with transcription support
-- **CSV Files** - Spreadsheet data analysis
+### 📄 **Document Management**
+- **PDF, DOCX, TXT Support** - Simplified document processing pipeline
+- **Semantic Search** - Natural language document querying with RAG
+- **Vector Embeddings** - Advanced search using OpenAI embeddings
+- **Document Viewer** - Integrated PDF viewer with zoom and navigation
 
-### 🤖 **AI-Powered Analysis**
-- **OpenAI GPT-4 Integration** - Intelligent document summarization
-- **Whisper Integration** - Audio transcription capabilities
-- **Semantic Search** - Natural language document querying
-- **RAG (Retrieval-Augmented Generation)** - Context-aware responses
+### 🤖 **AI-Powered Search**
+- **Smart Intent Parser** - Automatically routes queries to documents, employees, or calendar
+- **RAG (Retrieval-Augmented Generation)** - Context-aware responses from document content
+- **OpenAI GPT-4 Integration** - Intelligent document analysis and summarization
+- **Unified Search Interface** - Single search bar for all content types
 
-### 🔍 **Advanced Document Processing**
-- **Smart Text Extraction** - Multiple parsing methods for optimal results
-- **Document Viewer** - Integrated PDF viewer with zoom, rotation, and navigation
-- **Real-time Processing** - Instant document analysis and feedback
-- **Batch Processing** - Handle multiple documents efficiently
+### 👥 **Employee Management**
+- **Employee Database** - Comprehensive employee information storage
+- **Search & Filter** - Find employees by name, department, or skills
+- **Contact Information** - Phone, email, and address management
+- **Department Organization** - Organize employees by departments
+
+### 📅 **Interview Scheduling**
+- **Calendar Integration** - Built-in calendar for interview scheduling
+- **Event Management** - Create, update, and delete interview events
+- **Employee Linking** - Link interviews to specific employees and interviewers
+- **Status Tracking** - Track interview status (scheduled, completed, cancelled)
 
 ### 🔐 **Authentication & Security**
-- **Supabase Integration** - Secure user authentication
-- **Google OAuth** - One-click Google sign-in
-- **Microsoft OAuth** - Enterprise authentication support
-- **Enhanced Guest Mode** - Try the platform without registration with sample data
-- **Investor Demo Mode** - Professional demo experience with pre-loaded documents
+- **Supabase Integration** - Secure user authentication with email/password
 - **Row Level Security** - Data protection and privacy
 - **Environment Variable Security** - No hardcoded API keys
 
-### 🎯 **Enhanced Guest Mode**
-- **Instant Demo Access** - No registration required for immediate exploration
-- **Sample Data Loading** - Pre-loaded HR, financial, and strategy documents
-- **Feature Exploration** - Guided tour of all platform capabilities
-- **Investor-Ready Interface** - Professional presentation for business demos
-- **Local Storage Persistence** - Browser-based data that persists between sessions
-- **Complete Feature Access** - Full platform functionality without limitations
-- **Professional Presentation** - Business-focused interface for investor demos
+## 🏗️ **Simplified Architecture**
 
-### 🔗 **Rich Platform Integrations**
-- **LinkedIn Professional Network** - Import profile data, connections, and professional content
-- **Google Drive Integration** - Seamless document import from Drive folders
-- **Cross-Platform Document Linking** - Connect LinkedIn posts to Drive documents
-- **Professional Context Analysis** - Industry-specific document insights
-- **Network Intelligence** - Leverage professional connections for document discovery
+The platform has been streamlined to focus on core HR functionality:
 
-### 💾 **Flexible Storage Options**
-- **Database Storage** - Persistent document storage with Supabase
-- **Local Storage** - Guest mode with browser-based storage
-- **Vector Embeddings** - Semantic search capabilities
-- **File Management** - Upload, organize, and manage documents
+- **Frontend**: Next.js with Tailwind CSS for a clean, responsive interface
+- **Backend**: Next.js API routes for business logic
+- **Database**: PostgreSQL with pg_vector for vector embeddings
+- **Authentication**: Supabase email/password authentication
+- **Document Storage**: Supabase Storage for file management
+- **AI & Search**: OpenAI for embeddings and RAG-based search
+- **Smart Parser**: Intent detection for routing queries to appropriate search domains
 
-### 🎨 **Modern User Interface**
-- **Mobile-First Design** - Optimized for all devices with touch-friendly interactions
-- **Responsive Navigation** - Hamburger menu with smooth animations for mobile
-- **Dark/Light Mode** - System preference detection with manual toggle
-- **Montserrat Font** - Clean, modern typography throughout
-- **Context-Aware Navigation** - Smart button visibility based on current page
-- **Streamlined Interface** - Clean, uncluttered design with minimal redundant elements
-- **Real-time Feedback** - Loading states and progress indicators
-- **Identity Indicator** - Shows the signed-in user's avatar/email in the navbar for clarity
-- **Simplified Dashboard** - Reduced visual clutter with focused primary actions
+### **Removed Features**
+To simplify the platform, the following features have been removed:
+- Multi-format document support (now limited to PDF, DOCX, TXT)
+- External OAuth providers (Google, Microsoft, LinkedIn)
+- Platform integrations (Google Drive, LinkedIn, Facebook, Twitter)
+- Guest mode and investor demo mode
+- Complex calendar integrations
+- Advanced AI features (Whisper, complex document processing)
+- Mobile-specific optimizations
 
-### 📱 **Mobile Optimization**
-- **Touch-Friendly Interface** - 44px+ touch targets for optimal mobile interaction
-- **Responsive Components** - All components optimized for mobile screens
-- **Fast Mobile Loading** - 40% faster initial load on mobile devices
-- **Mobile Voice Chat** - Optimized voice interface for mobile devices
-- **Touch Gestures** - Swipe and tap optimized interactions
-- **Mobile Navigation** - Intuitive hamburger menu with slide-out functionality
-- **Responsive Images** - Optimized image loading and sizing for mobile
-- **Mobile Performance** - 60% reduction in mobile bandwidth usage
+## 🚀 **Quick Start**
+
+### Prerequisites
+- Node.js 18+ 
+- pnpm package manager
+- OpenAI API key
+- Supabase account
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/voiceloophr.git
+   cd voiceloophr
+   ```
+
+2. **Install dependencies**
+   ```bash
+   pnpm install
+   ```
+
+3. **Environment Setup**
+   ```bash
+   cp .env.example .env.local
+   ```
+   
+   Configure your environment variables:
+   ```env
+   # OpenAI Configuration
+   OPENAI_API_KEY=your_openai_api_key_here
+   
+   # Supabase Configuration
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+   
+   # App Configuration
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   ```
+
+4. **Database Setup**
+   ```bash
+   # Run database migrations
+   psql -h your_host -U your_user -d your_database -f database/migrations/005_create_employees_and_calendar.sql
+   
+   # Import sample employee data (optional)
+   node scripts/import-employee-data.js
+   ```
+
+5. **Start Development Server**
+   ```bash
+   pnpm dev
+   ```
+
+6. **Open in Browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## 📖 **Usage**
+
+### Document Management
+1. Upload PDF, DOCX, or TXT files through the upload interface
+2. Documents are automatically processed and indexed for search
+3. Use the semantic search to find information across all documents
+
+### Employee Management
+1. Access the Staff Dashboard from the main dashboard
+2. View, search, and filter employees by department or name
+3. Add new employees with contact information and skills
+
+### Interview Scheduling
+1. Use the calendar interface in the Staff Dashboard
+2. Schedule interviews and link them to specific employees
+3. Track interview status and details
+
+### Smart Search
+The platform includes a smart intent parser that automatically routes your queries:
+- **Document queries**: "Find information about company policies"
+- **Employee queries**: "Who is the HR manager?"
+- **Calendar queries**: "Schedule an interview for tomorrow"
 
 ## 🛠️ Technology Stack
 
@@ -91,14 +151,12 @@ VoiceLoop HR is a cutting-edge document analysis platform that combines AI-power
 - **Next.js API Routes** - Serverless API endpoints
 - **Supabase** - Database and authentication
 - **PostgreSQL** - Relational database with pg_vector extension
-- **OpenAI API** - GPT-4 and Whisper integration
+- **OpenAI API** - GPT-4 integration for RAG and embeddings
 
 ### **Document Processing**
 - **Mammoth** - DOCX parsing
-- **XLSX** - Excel file processing
 - **PDF-Parse** - PDF text extraction
-- **Custom PDF Parser** - Enhanced PDF processing
-- **File Type Detection** - Automatic format recognition
+- **Simple Document Processor** - Streamlined processing pipeline
 
 ### **Development Tools**
 - **pnpm** - Fast package manager

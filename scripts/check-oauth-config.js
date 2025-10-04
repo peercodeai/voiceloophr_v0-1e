@@ -11,10 +11,6 @@ console.log('🔍 VoiceLoop HR OAuth Configuration Check\n');
 const requiredVars = [
   'NEXT_PUBLIC_SUPABASE_URL',
   'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-  'GOOGLE_OAUTH_CLIENT_ID',
-  'GOOGLE_OAUTH_CLIENT_SECRET',
-  'MICROSOFT_CLIENT_ID',
-  'MICROSOFT_CLIENT_SECRET',
   'NEXT_PUBLIC_APP_URL'
 ];
 

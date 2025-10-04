@@ -13,7 +13,6 @@ import { toast } from "sonner"
 import { Upload, FileText, File, Music, Video, X, CheckCircle, AlertCircle, ArrowLeft } from "lucide-react"
 import { LogoLoader } from "@/components/logo-loader"
 import { MobileNavigation } from "@/components/mobile-navigation"
-import GoogleDriveImport from "@/components/google-drive-import"
 import { getSupabaseBrowser } from "@/lib/supabase-browser"
 interface UploadedFile {
   id: string
@@ -47,7 +46,6 @@ export default function UploadPage() {
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set())
   const router = useRouter()
 
-  const [driveOpen, setDriveOpen] = useState(false)
 
   // Load user authentication state
   useEffect(() => {
@@ -91,22 +89,6 @@ export default function UploadPage() {
     })
   }, [])
 
-  const handleDrivePicked = useCallback((file: File) => {
-    const newFile: UploadedFile = {
-      id: Math.random().toString(36).substr(2, 9),
-      file,
-      status: "uploading",
-      progress: 0,
-    }
-    setFiles((prev) => [...prev, newFile])
-    const interval = simulateProgress(newFile.id)
-    if (interval) {
-      setProgressIntervals(prev => new Map(prev).set(newFile.id, interval))
-    }
-    setTimeout(() => {
-      processFile(newFile.id, newFile)
-    }, 800)
-  }, [])
 
   const processFile = async (fileId: string, uploadedFile: UploadedFile) => {
     if (!uploadedFile) return
@@ -943,7 +925,7 @@ export default function UploadPage() {
             <Button
               variant="outline"
               className="font-light bg-transparent"
-              onClick={() => setDriveOpen(true)}
+              onClick={() => alert('Google Drive integration has been removed in the simplified version')}
             >
               Import from Google Drive
             </Button>
@@ -1261,12 +1243,6 @@ export default function UploadPage() {
         )}
 
 
-      {/* Google Drive Import Modal */}
-      <GoogleDriveImport
-        open={driveOpen}
-        onClose={() => setDriveOpen(false)}
-        onPicked={handleDrivePicked}
-      />
      </div>
    )
  }

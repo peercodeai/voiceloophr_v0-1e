@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Search, FileText, File, Music, Video, Clock, Star, Loader2 } from "lucide-react"
+import { Search, FileText, File, Music, Video, Clock, Star, Loader2, Users } from "lucide-react"
 import { SophisticatedLoader } from "@/components/sophisticated-loader"
 
 interface SearchResult {
@@ -37,6 +37,7 @@ export default function SearchInterface() {
   const [searchTime, setSearchTime] = useState("")
   const [totalResults, setTotalResults] = useState(0)
   const [hasSearched, setHasSearched] = useState(false)
+  const [searchType, setSearchType] = useState<'documents' | 'employees' | 'calendar'>('documents')
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,6 +47,30 @@ export default function SearchInterface() {
     setHasSearched(true)
 
     try {
+      // First, parse the intent to determine search type
+      const intentResponse = await fetch('/api/parse-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+      })
+
+      const intentData = await intentResponse.json()
+      const intent = intentData.intent || 'document_search'
+
+      // Route to appropriate search based on intent
+      if (intent === 'employee_search') {
+        setSearchType('employees')
+        await searchEmployees(query)
+        return
+      } else if (intent === 'calendar_search') {
+        setSearchType('calendar')
+        await searchCalendar(query)
+        return
+      } else {
+        setSearchType('documents')
+      }
+
+      // Default to document search
       // Check if we're in guest mode (no Supabase configured)
       let isGuestMode = false
       try {
@@ -167,8 +192,80 @@ export default function SearchInterface() {
     }
   }
 
+  const searchEmployees = async (searchQuery: string) => {
+    try {
+      const response = await fetch(`/api/employees?search=${encodeURIComponent(searchQuery)}`)
+      const data = await response.json()
+      
+      // Transform employee data to match SearchResult interface
+      const transformedResults = (data.employees || []).map((employee: any) => ({
+        id: employee.id.toString(),
+        fileName: employee.name,
+        title: `${employee.name} - ${employee.job_title || 'Employee'}`,
+        snippet: `${employee.department || 'Unknown Department'} • ${employee.email}${employee.phone_number ? ` • ${employee.phone_number}` : ''}`,
+        relevanceScore: 0.8, // High relevance for employee search
+        fileType: 'employee',
+        uploadedAt: employee.created_at,
+        matchedChunks: [`Name: ${employee.name}`, `Department: ${employee.department}`, `Email: ${employee.email}`]
+      }))
+
+      setResults(transformedResults)
+      setTotalResults(transformedResults.length)
+      setSearchTime("")
+    } catch (error) {
+      console.error("Employee search error:", error)
+      setResults([])
+      setTotalResults(0)
+    }
+  }
+
+  const searchCalendar = async (searchQuery: string) => {
+    try {
+      // For calendar search, we'll search for events containing the query
+      const response = await fetch('/api/calendar')
+      const data = await response.json()
+      
+      const queryLower = searchQuery.toLowerCase()
+      const filteredEvents = (data.events || []).filter((event: any) => 
+        event.title.toLowerCase().includes(queryLower) ||
+        (event.description && event.description.toLowerCase().includes(queryLower)) ||
+        (event.employee && event.employee.name.toLowerCase().includes(queryLower)) ||
+        (event.interviewer && event.interviewer.name.toLowerCase().includes(queryLower))
+      )
+
+      // Transform calendar data to match SearchResult interface
+      const transformedResults = filteredEvents.map((event: any) => {
+        const startDate = new Date(event.start_time).toLocaleDateString()
+        const startTime = new Date(event.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        
+        return {
+          id: event.id.toString(),
+          fileName: event.title,
+          title: `${event.title} - ${startDate} at ${startTime}`,
+          snippet: `${event.event_type || 'Interview'} • ${event.employee?.name ? `Candidate: ${event.employee.name}` : ''} • ${event.interviewer?.name ? `Interviewer: ${event.interviewer.name}` : ''}`,
+          relevanceScore: 0.8,
+          fileType: 'calendar',
+          uploadedAt: event.created_at,
+          matchedChunks: [`Title: ${event.title}`, `Date: ${startDate}`, `Time: ${startTime}`]
+        }
+      })
+
+      setResults(transformedResults)
+      setTotalResults(transformedResults.length)
+      setSearchTime("")
+    } catch (error) {
+      console.error("Calendar search error:", error)
+      setResults([])
+      setTotalResults(0)
+    }
+  }
+
   const getFileIcon = (fileType: string) => {
     switch (fileType.toLowerCase()) {
+      case "employee":
+        return <Users className="h-5 w-5 text-blue-500" />
+      case "calendar":
+        return <Clock className="h-5 w-5 text-green-500" />
       case "pdf":
         return <FileText className="h-5 w-5 text-red-500" />
       case "markdown":
@@ -212,7 +309,7 @@ export default function SearchInterface() {
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search across all your documents..."
+                placeholder="Search documents, employees, or calendar events..."
                 className="pl-10 font-light"
                 disabled={isSearching}
               />
@@ -230,7 +327,7 @@ export default function SearchInterface() {
           </div>
 
           <div className="text-sm text-muted-foreground font-light">
-            <p>Use natural language to search across all your uploaded documents. Try queries like:</p>
+            <p>Use natural language to search across documents, employees, and calendar events. Try queries like:</p>
             <div className="flex flex-wrap gap-2 mt-2">
               <Badge
                 variant="outline"
@@ -238,6 +335,20 @@ export default function SearchInterface() {
                 onClick={() => setQuery("budget analysis")}
               >
                 "budget analysis"
+              </Badge>
+              <Badge
+                variant="outline"
+                className="font-light cursor-pointer"
+                onClick={() => setQuery("who is the HR manager")}
+              >
+                "who is the HR manager"
+              </Badge>
+              <Badge
+                variant="outline"
+                className="font-light cursor-pointer"
+                onClick={() => setQuery("schedule interview tomorrow")}
+              >
+                "schedule interview tomorrow"
               </Badge>
               <Badge
                 variant="outline"

@@ -22,11 +22,6 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
   const [authOpen, setAuthOpen] = useState(false)
-  const [serviceStatus, setServiceStatus] = useState({
-    google: false,
-    microsoft: false,
-    calendar: false
-  })
 
   useEffect(() => {
     // Load saved keys from localStorage
@@ -80,30 +75,6 @@ export default function SettingsPage() {
     return key.slice(0, 8) + "..." + key.slice(-4)
   }
 
-  const handleOAuth = async (provider: 'google' | 'linkedin_oidc' | 'azure') => {
-    try {
-      const supabase = getSupabaseBrowser()
-      if (!supabase) return
-      const redirectTo = typeof window !== 'undefined' ? `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/auth/callback` : undefined
-      const scopes = provider === 'google'
-        ? 'openid email profile https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file'
-        : provider === 'linkedin_oidc'
-        ? 'openid profile email'
-        : 'openid email profile offline_access https://graph.microsoft.com/calendars.read'
-      await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo,
-          scopes,
-          queryParams: provider === 'azure' 
-            ? { prompt: 'consent' }
-            : { prompt: 'consent select_account', access_type: 'offline' }
-        }
-      })
-    } catch (e) {
-      console.error('Auth error:', e)
-    }
-  }
 
 
   const handleSignOut = async () => {
@@ -116,59 +87,7 @@ export default function SettingsPage() {
     }
   }
 
-  const handleServiceSignOut = (service: string) => {
-    switch (service) {
-      case 'google':
-        localStorage.removeItem('google_drive_tokens')
-        break
-      case 'microsoft':
-        localStorage.removeItem('microsoft_calendar_tokens')
-        break
-      case 'calendar':
-        localStorage.removeItem('google_calendar_tokens')
-        break
-    }
-    setServiceStatus(prev => ({ ...prev, [service]: false }))
-  }
 
-  const handleGoogleCalendarAuth = async () => {
-    try {
-      const response = await fetch('/api/calendar/auth/google', { method: 'POST' })
-      const data = await response.json()
-      if (data?.authUrl) {
-        window.open(data.authUrl, 'google-calendar-auth', 'width=500,height=650')
-        setTimeout(() => {
-          const tokens = localStorage.getItem('google_calendar_tokens')
-          if (tokens) {
-            setServiceStatus(prev => ({ ...prev, calendar: true }))
-          }
-        }, 2000)
-      }
-    } catch (error) {
-      console.error('Google Calendar auth error:', error)
-    }
-  }
-
-  const handleMicrosoftAuth = async () => {
-    try {
-      const response = await fetch('/api/calendar/auth/microsoft', { method: 'POST' })
-      const data = await response.json()
-      if (data?.authUrl) {
-        const popup = window.open(data.authUrl, 'microsoft-auth', 'width=500,height=650')
-        const timer = setInterval(() => {
-          if (popup?.closed) {
-            clearInterval(timer)
-            const tokens = localStorage.getItem('microsoft_calendar_tokens')
-            if (tokens) {
-              setServiceStatus(prev => ({ ...prev, microsoft: true }))
-            }
-          }
-        }, 1000)
-      }
-    } catch (error) {
-      console.error('Microsoft auth error:', error)
-    }
-  }
 
 
   return (
@@ -224,36 +143,18 @@ export default function SettingsPage() {
                     <div className="flex items-center gap-2">
                       <LogIn className="h-4 w-4 text-blue-600" />
                       <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                        Sign in to sync your documents and settings
+                        Sign in with email and password to access all features
                       </span>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full sm:w-auto">
+                    <div className="w-full sm:w-auto">
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => handleOAuth('google')}
+                        onClick={() => setAuthOpen(true)}
                         className="text-blue-600 border-blue-200 hover:border-blue-300 w-full sm:w-auto"
                       >
                         <LogIn className="mr-1 h-3 w-3" />
-                        Google
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleOAuth('linkedin_oidc')}
-                        className="text-blue-600 border-blue-200 hover:border-blue-300 w-full sm:w-auto"
-                      >
-                        <LogIn className="mr-1 h-3 w-3" />
-                        LinkedIn
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleOAuth('azure')}
-                        className="text-blue-600 border-blue-200 hover:border-blue-300 w-full sm:w-auto"
-                      >
-                        <LogIn className="mr-1 h-3 w-3" />
-                        Microsoft
+                        Sign In
                       </Button>
                     </div>
                   </div>
@@ -261,118 +162,16 @@ export default function SettingsPage() {
               )}
 
               <div className="space-y-4">
-                {/* Google Drive */}
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Cloud className="h-5 w-5 text-blue-500" />
-                    <div>
-                      <h3 className="font-medium">Google Drive</h3>
-                      <p className="text-sm text-muted-foreground">Access and import documents from Google Drive</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {serviceStatus.google ? (
-                      <>
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-sm text-green-600">Connected</span>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleServiceSignOut('google')}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <XCircle className="mr-1 h-3 w-3" />
-                          Disconnect
-                        </Button>
-                      </>
-                    ) : (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleOAuth('google')}
-                      >
-                        <LogIn className="mr-1 h-3 w-3" />
-                        Connect
-                      </Button>
-                    )}
-                  </div>
+                <div className="text-center py-8">
+                  <Cloud className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">External Integrations Removed</h3>
+                  <p className="text-sm text-muted-foreground">
+                    The simplified version focuses on core HR functionality. External platform integrations have been removed for a streamlined experience.
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    You can still upload documents directly and manage employees through the Staff Dashboard.
+                  </p>
                 </div>
-
-                {/* Google Calendar */}
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Calendar className="h-5 w-5 text-green-500" />
-                    <div>
-                      <h3 className="font-medium">Google Calendar</h3>
-                      <p className="text-sm text-muted-foreground">Schedule meetings and view calendar events</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {serviceStatus.calendar ? (
-                      <>
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-sm text-green-600">Connected</span>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleServiceSignOut('calendar')}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <XCircle className="mr-1 h-3 w-3" />
-                          Disconnect
-                        </Button>
-                      </>
-                    ) : (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={handleGoogleCalendarAuth}
-                      >
-                        <LogIn className="mr-1 h-3 w-3" />
-                        Connect
-                      </Button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Microsoft Calendar */}
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Calendar className="h-5 w-5 text-blue-600" />
-                    <div>
-                      <h3 className="font-medium">Microsoft Calendar</h3>
-                      <p className="text-sm text-muted-foreground">Access Outlook calendar and schedule meetings</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {serviceStatus.microsoft ? (
-                      <>
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-sm text-green-600">Connected</span>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleServiceSignOut('microsoft')}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <XCircle className="mr-1 h-3 w-3" />
-                          Disconnect
-                        </Button>
-                      </>
-                    ) : (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={handleMicrosoftAuth}
-                      >
-                        <LogIn className="mr-1 h-3 w-3" />
-                        Connect
-                      </Button>
-                    )}
-                  </div>
-                </div>
-
-
               </div>
             </Card>
 

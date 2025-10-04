@@ -39,35 +39,14 @@ export default function HomePage() {
     return () => clearInterval(t)
   }, [])
 
-  const handleOAuth = async (provider: 'google' | 'linkedin_oidc' | 'azure') => {
+  const handleAuth = () => {
     // Disabled for demo
     if (process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true') {
       alert('Authentication disabled for demo. You can use the app directly.')
       return
     }
     
-    try {
-      const supabase = getSupabaseBrowser()
-      if (!supabase) return
-      const redirectTo = typeof window !== 'undefined' ? `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/auth/callback` : undefined
-      const scopes = provider === 'google'
-        ? 'openid email profile https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file'
-        : provider === 'linkedin_oidc'
-        ? 'openid profile email'
-        : 'openid email profile offline_access https://graph.microsoft.com/calendars.read'
-      await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo,
-          scopes,
-          queryParams: provider === 'azure' 
-            ? { prompt: 'consent' }
-            : { prompt: 'consent select_account', access_type: 'offline' }
-        }
-      })
-    } catch (e) {
-      console.error('Auth error:', e)
-    }
+    setAuthOpen(true)
   }
 
   const handleEmailMagic = async () => {
@@ -207,7 +186,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-xl font-montserrat-light mb-3">Seamless Integration</h3>
               <p className="text-muted-foreground font-montserrat-light">
-                Connect with Google Drive, LinkedIn, and Microsoft services for a unified document experience across platforms.
+                Upload and process your HR documents with intelligent search and analysis capabilities.
               </p>
             </div>
 

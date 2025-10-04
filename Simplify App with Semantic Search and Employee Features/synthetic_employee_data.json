@@ -1,0 +1,329 @@
+[
+    {
+        "id": 1,
+        "name": "Rodney Garcia",
+        "email": "michelle88@example.org",
+        "phone_number": "(938)948-8421",
+        "job_title": "Medical technical officer",
+        "department": "Marketing",
+        "hire_date": "2022-04-11",
+        "salary": 136604.39,
+        "address": "08574 Virginia Roads\nJodiland, HI 67707",
+        "skills": [
+            "Python",
+            "Data Analysis",
+            "SQL",
+            "JavaScript"
+        ]
+    },
+    {
+        "id": 2,
+        "name": "Brooke Johnson",
+        "email": "hernandezdiane@example.org",
+        "phone_number": "+1-580-722-4367x80223",
+        "job_title": "Textile designer",
+        "department": "Operations",
+        "hire_date": "2021-07-09",
+        "salary": 144299.99,
+        "address": "5272 Samuel Cape Apt. 395\nAlvaradobury, PA 94987",
+        "skills": [
+            "Data Analysis",
+            "Communication"
+        ]
+    },
+    {
+        "id": 3,
+        "name": "Emily Murphy",
+        "email": "jasonwilliams@example.org",
+        "phone_number": "5075736656",
+        "job_title": "Publishing copy",
+        "department": "Finance",
+        "hire_date": "2024-10-31",
+        "salary": 143022.92,
+        "address": "94663 Burch Estate\nSouth Makaylaburgh, MN 18257",
+        "skills": [
+            "Machine Learning",
+            "Cloud Computing"
+        ]
+    },
+    {
+        "id": 4,
+        "name": "Brian Holden",
+        "email": "john42@example.org",
+        "phone_number": "001-367-621-2998x641",
+        "job_title": "Counsellor",
+        "department": "Sales",
+        "hire_date": "2020-11-30",
+        "salary": 78853.39,
+        "address": "841 Alejandra Neck Suite 212\nBrianton, MI 71361",
+        "skills": [
+            "Python",
+            "Teamwork"
+        ]
+    },
+    {
+        "id": 5,
+        "name": "Craig Parker",
+        "email": "ajones@example.net",
+        "phone_number": "+1-424-256-6004x217",
+        "job_title": "Geoscientist",
+        "department": "HR",
+        "hire_date": "2024-07-14",
+        "salary": 56517.85,
+        "address": "382 Cruz Mills Apt. 730\nMarieview, VT 22850",
+        "skills": [
+            "Project Management",
+            "SQL",
+            "Teamwork",
+            "Communication"
+        ]
+    },
+    {
+        "id": 6,
+        "name": "Renee Curry",
+        "email": "daniel59@example.org",
+        "phone_number": "001-938-553-1032",
+        "job_title": "Surveyor, commercial/residential",
+        "department": "Finance",
+        "hire_date": "2025-09-08",
+        "salary": 144437.43,
+        "address": "0142 Tammy Light Apt. 825\nJuliafort, NJ 66318",
+        "skills": [
+            "Cloud Computing",
+            "SQL",
+            "Project Management",
+            "Python",
+            "Machine Learning"
+        ]
+    },
+    {
+        "id": 7,
+        "name": "Mark Ray",
+        "email": "omarshall@example.com",
+        "phone_number": "001-838-948-6418x475",
+        "job_title": "Statistician",
+        "department": "Operations",
+        "hire_date": "2025-08-22",
+        "salary": 101633.32,
+        "address": "1022 Hernandez Manor\nEast Stevenshire, OR 64647",
+        "skills": [
+            "Data Analysis",
+            "Communication",
+            "SQL"
+        ]
+    },
+    {
+        "id": 8,
+        "name": "Michael Cooper",
+        "email": "pbailey@example.org",
+        "phone_number": "(932)219-5709",
+        "job_title": "Designer, industrial/product",
+        "department": "Marketing",
+        "hire_date": "2020-11-14",
+        "salary": 112910.6,
+        "address": "101 Sharon Glen Apt. 706\nNorth Denise, KS 37418",
+        "skills": [
+            "Data Analysis",
+            "SQL",
+            "Python"
+        ]
+    },
+    {
+        "id": 9,
+        "name": "Deborah Ho",
+        "email": "teresamiller@example.org",
+        "phone_number": "499.865.2331",
+        "job_title": "Solicitor",
+        "department": "Sales",
+        "hire_date": "2022-11-07",
+        "salary": 106524.8,
+        "address": "3496 Peter Green\nNorth Stephanie, KY 02588",
+        "skills": [
+            "SQL",
+            "Communication",
+            "Project Management",
+            "Teamwork",
+            "Cloud Computing"
+        ]
+    },
+    {
+        "id": 10,
+        "name": "Thomas Phelps",
+        "email": "rileyrobert@example.org",
+        "phone_number": "322-956-9594",
+        "job_title": "Purchasing manager",
+        "department": "Engineering",
+        "hire_date": "2025-03-20",
+        "salary": 105412.47,
+        "address": "USNS Moody\nFPO AP 14543",
+        "skills": [
+            "JavaScript",
+            "Machine Learning"
+        ]
+    },
+    {
+        "id": 11,
+        "name": "Tina Barnett",
+        "email": "tiffanybailey@example.net",
+        "phone_number": "380-806-7568",
+        "job_title": "Archaeologist",
+        "department": "Finance",
+        "hire_date": "2021-09-22",
+        "salary": 110788.37,
+        "address": "Unit 5722 Box 1914\nDPO AA 39778",
+        "skills": [
+            "Communication",
+            "Cloud Computing",
+            "JavaScript"
+        ]
+    },
+    {
+        "id": 12,
+        "name": "Kevin Davis",
+        "email": "iburns@example.org",
+        "phone_number": "404.375.4206",
+        "job_title": "Materials engineer",
+        "department": "Operations",
+        "hire_date": "2023-09-16",
+        "salary": 50823.34,
+        "address": "02523 Jackson Springs Apt. 477\nJameschester, WA 29248",
+        "skills": [
+            "SQL",
+            "Communication"
+        ]
+    },
+    {
+        "id": 13,
+        "name": "Shelby Mejia",
+        "email": "tranmichael@example.net",
+        "phone_number": "001-684-514-3690x67571",
+        "job_title": "Set designer",
+        "department": "Marketing",
+        "hire_date": "2022-12-07",
+        "salary": 98486.24,
+        "address": "Unit 9493 Box 1710\nDPO AA 68612",
+        "skills": [
+            "Teamwork",
+            "Data Analysis",
+            "JavaScript",
+            "Communication"
+        ]
+    },
+    {
+        "id": 14,
+        "name": "Stephanie Burnett",
+        "email": "cynthia74@example.com",
+        "phone_number": "+1-599-746-0895x25886",
+        "job_title": "Radiation protection practitioner",
+        "department": "Sales",
+        "hire_date": "2025-09-26",
+        "salary": 136154.69,
+        "address": "870 Connie Locks\nEast Darrell, IA 53867",
+        "skills": [
+            "SQL",
+            "Data Analysis",
+            "Communication",
+            "JavaScript"
+        ]
+    },
+    {
+        "id": 15,
+        "name": "Caroline Hart",
+        "email": "elizabeth12@example.net",
+        "phone_number": "430.775.2420x533",
+        "job_title": "Analytical chemist",
+        "department": "Marketing",
+        "hire_date": "2025-06-13",
+        "salary": 148399.94,
+        "address": "132 Yesenia Rapids\nSarahview, AK 17949",
+        "skills": [
+            "JavaScript",
+            "Data Analysis",
+            "Python",
+            "Cloud Computing",
+            "Teamwork"
+        ]
+    },
+    {
+        "id": 16,
+        "name": "Norman Cherry",
+        "email": "yjohnson@example.org",
+        "phone_number": "8626833533",
+        "job_title": "Dentist",
+        "department": "HR",
+        "hire_date": "2022-02-27",
+        "salary": 122374.05,
+        "address": "Unit 2117 Box 4447\nDPO AA 88215",
+        "skills": [
+            "Python",
+            "SQL",
+            "Machine Learning"
+        ]
+    },
+    {
+        "id": 17,
+        "name": "Bradley Grant",
+        "email": "lhull@example.org",
+        "phone_number": "748-644-2618x9934",
+        "job_title": "Therapist, occupational",
+        "department": "HR",
+        "hire_date": "2025-01-12",
+        "salary": 61021.57,
+        "address": "88953 Roberta Junctions\nMillerton, MH 09336",
+        "skills": [
+            "Communication",
+            "Cloud Computing",
+            "JavaScript",
+            "Project Management",
+            "Python"
+        ]
+    },
+    {
+        "id": 18,
+        "name": "Michelle Guzman",
+        "email": "williamfoster@example.net",
+        "phone_number": "(660)490-9710x003",
+        "job_title": "Advertising account executive",
+        "department": "Operations",
+        "hire_date": "2022-07-31",
+        "salary": 131838.27,
+        "address": "1140 Tiffany Summit\nSouth Johntown, IA 16125",
+        "skills": [
+            "Python",
+            "Machine Learning",
+            "Data Analysis"
+        ]
+    },
+    {
+        "id": 19,
+        "name": "Rachel Bailey",
+        "email": "karenpatel@example.org",
+        "phone_number": "(571)290-6252x575",
+        "job_title": "Newspaper journalist",
+        "department": "Engineering",
+        "hire_date": "2021-05-04",
+        "salary": 72011.69,
+        "address": "4603 Shane Lodge\nChristinabury, ME 25083",
+        "skills": [
+            "Python",
+            "Teamwork"
+        ]
+    },
+    {
+        "id": 20,
+        "name": "Connie Bradford",
+        "email": "edward07@example.net",
+        "phone_number": "674-494-1503x1298",
+        "job_title": "Chartered legal executive (England and Wales)",
+        "department": "Operations",
+        "hire_date": "2020-12-02",
+        "salary": 81974.59,
+        "address": "USS Jimenez\nFPO AA 56880",
+        "skills": [
+            "Data Analysis",
+            "Project Management",
+            "Python",
+            "Machine Learning"
+        ]
+    }
+]

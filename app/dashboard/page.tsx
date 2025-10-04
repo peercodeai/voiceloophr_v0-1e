@@ -25,11 +25,10 @@ import {
   Trash2,
   RefreshCw,
   AlertCircle,
+  Users,
 } from "lucide-react"
 import { SophisticatedLoader } from "@/components/sophisticated-loader"
 import { MobileNavigation } from "@/components/mobile-navigation"
-import EnhancedGuestMode from "@/components/enhanced-guest-mode"
-import { FullCalendar } from "@/components/full-calendar"
 import VoiceChat from "@/components/voice-chat"
 import { Footer } from "@/components/footer"
 import { getSupabaseBrowser } from "@/lib/supabase-browser"
@@ -466,10 +465,6 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* Enhanced Guest Mode */}
-        <div className="mb-8">
-          <EnhancedGuestMode />
-        </div>
 
         {/* Voice Chat (open by default) */}
         <div className="mb-8">
@@ -481,9 +476,22 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Calendar - Show full calendar for all users */}
+        {/* Staff Dashboard Link */}
         <div className="mb-8">
-          <FullCalendar />
+          <Card className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold mb-2">Staff Management</h2>
+                <p className="text-muted-foreground">Access employee database and interview scheduling</p>
+              </div>
+              <Button asChild>
+                <Link href="/dashboard/staff">
+                  <Users className="mr-2 h-4 w-4" />
+                  Staff Dashboard
+                </Link>
+              </Button>
+            </div>
+          </Card>
         </div>
 
         {/* Quick Actions - Available for all users */}

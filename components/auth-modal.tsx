@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -12,6 +12,10 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ open, onClose }: AuthModalProps) {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     if (!open) return
@@ -27,31 +31,30 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
 
   if (!open) return null
 
-  const openOAuth = async (provider: 'google' | 'linkedin_oidc' | 'azure') => {
+  const signInWithEmail = async (email: string, password: string) => {
+    setLoading(true)
+    setError('')
     try {
       const supabase = getSupabaseBrowser()
       if (!supabase) return
-      const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/auth/callback`
-      const scopes = provider === 'google'
-        ? 'openid email profile https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/calendar.readonly'
-        : provider === 'linkedin_oidc'
-        ? 'openid profile email'
-        : 'openid email profile offline_access https://graph.microsoft.com/calendars.read'
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo,
-          skipBrowserRedirect: false,
-          // Provider-specific scopes
-          scopes,
-          queryParams: provider === 'azure' 
-            ? { prompt: 'consent' }
-            : { prompt: 'consent select_account', access_type: 'offline' }
-        }
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
       })
       if (error) throw error
+      onClose()
     } catch (e) {
-      console.error('OAuth error:', e)
+      console.error('Sign in error:', e)
+      setError(e instanceof Error ? e.message : 'Sign in failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (email && password) {
+      signInWithEmail(email, password)
     }
   }
 
@@ -63,15 +66,32 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
           <Image src="/images/voiceloop-logo.png" alt="VoiceLoop" width={56} height={56} className="rounded" />
           <h2 className="text-xl font-light">Sign in to VoiceLoop</h2>
 
-          <Button className="w-full font-light" onClick={() => openOAuth('google')}>
-            Sign in with Google
-          </Button>
-          <Button className="w-full font-light" variant="outline" onClick={() => openOAuth('linkedin_oidc')}>
-            Sign in with LinkedIn
-          </Button>
-          <Button className="w-full font-light" variant="outline" onClick={() => openOAuth('azure')}>
-            Sign in with Microsoft
-          </Button>
+          <form onSubmit={handleSubmit} className="w-full space-y-4">
+            <div>
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            {error && <p className="text-sm text-red-600">{error}</p>}
+            <Button disabled={loading} type="submit" className="w-full font-light">
+              {loading ? 'Signing in...' : 'Sign in'}
+            </Button>
+          </form>
 
           <Button variant="ghost" className="w-full font-light" onClick={onClose}>Cancel</Button>
         </div>

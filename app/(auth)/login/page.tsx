@@ -9,7 +9,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
 
-  const signInWithProvider = async (provider: 'google' | 'linkedin_oidc' | 'azure') => {
+  const signInWithEmail = async (email: string, password: string) => {
     setLoading(true)
     setMessage('')
     const supabase = getSupabaseBrowser()
@@ -18,33 +18,60 @@ export default function LoginPage() {
       setLoading(false)
       return
     }
-    const scopes = provider === 'google'
-      ? 'openid email profile https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file'
-      : provider === 'linkedin_oidc'
-      ? 'openid profile email'
-      : 'openid email profile offline_access https://graph.microsoft.com/calendars.read'
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}`,
-        scopes,
-        queryParams: provider === 'azure' 
-          ? { prompt: 'consent' }
-          : { prompt: 'consent select_account', access_type: 'offline' }
-      }
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password
     })
     if (error) setMessage(error.message)
     setLoading(false)
   }
 
 
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (email && password) {
+      signInWithEmail(email, password)
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-md space-y-4">
         <h1 className="text-2xl font-light text-center">Sign in</h1>
-        <Button disabled={loading} onClick={() => signInWithProvider('google')} className="w-full">Continue with Google</Button>
-        <Button disabled={loading} onClick={() => signInWithProvider('linkedin_oidc')} className="w-full" variant="outline">Continue with LinkedIn</Button>
-        <Button disabled={loading} onClick={() => signInWithProvider('azure')} className="w-full" variant="outline">Continue with Microsoft</Button>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium mb-1">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium mb-1">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <Button disabled={loading} type="submit" className="w-full">
+            {loading ? 'Signing in...' : 'Sign in'}
+          </Button>
+        </form>
         {message && <p className="text-sm text-muted-foreground text-center">{message}</p>}
         <p className="text-center text-sm"><Link href="/">Back to Home</Link></p>
       </div>

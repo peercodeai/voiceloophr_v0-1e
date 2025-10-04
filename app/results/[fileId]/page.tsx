@@ -15,7 +15,6 @@ import { DocumentViewer } from "@/components/DocumentViewer"
 import { UnifiedSaveButton } from "@/components/unified-save-button"
 import { Navigation } from "@/components/navigation"
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
-import GoogleDriveFolderPicker from '@/components/google-drive-folder-picker'
 import PostGenerator from '@/components/post-generator'
 
 interface ProcessedFile {
@@ -43,8 +42,6 @@ export default function ResultsPage() {
   const [error, setError] = useState<string | null>(null)
   const [isSavingToDrive, setIsSavingToDrive] = useState(false)
   const [saveToDriveMsg, setSaveToDriveMsg] = useState<string | null>(null)
-  const [folderPickerOpen, setFolderPickerOpen] = useState(false)
-  const [selectedFolder, setSelectedFolder] = useState<{ id: string, name: string } | null>(null)
 
   // Ensure we're in the browser environment
   useEffect(() => {
@@ -475,9 +472,9 @@ export default function ResultsPage() {
               <Button
                 variant="outline"
                 className="font-montserrat-light bg-transparent"
-                onClick={() => setFolderPickerOpen(true)}
+                onClick={() => alert('Google Drive integration has been removed in the simplified version')}
               >
-                {selectedFolder ? `Folder: ${selectedFolder.name}` : 'Choose Drive Folder'}
+                Choose Drive Folder
               </Button>
               <Button
                 variant="outline"
@@ -493,11 +490,6 @@ export default function ResultsPage() {
             </div>
           </div>
 
-          <GoogleDriveFolderPicker
-            open={folderPickerOpen}
-            onClose={() => setFolderPickerOpen(false)}
-            onPicked={(f) => setSelectedFolder(f)}
-          />
 
           {/* OpenAI Settings helper */}
           {typeof window !== 'undefined' && !localStorage.getItem('voiceloop_openai_key') && (
