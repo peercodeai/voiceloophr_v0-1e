@@ -4,14 +4,13 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
     const audioFile = formData.get("audio") as File
-    const openaiKey = formData.get("openaiKey") as string
 
     if (!audioFile) {
       return NextResponse.json({ error: "Missing audio file" }, { status: 400 })
     }
 
-    // Use hardcoded API key for native intelligence
-    const finalOpenaiKey = openaiKey || process.env.OPENAI_API_KEY;
+    // Use server environment variable for API key
+    const finalOpenaiKey = process.env.OPENAI_API_KEY;
     if (!finalOpenaiKey) {
       return NextResponse.json(
         { error: 'OpenAI API key not configured in environment variables.' },

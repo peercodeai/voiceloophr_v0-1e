@@ -29,35 +29,30 @@ export const fileUploadSchema = z.object({
 export const documentAnalysisSchema = z.object({
   text: contentSchema,
   fileName: fileNameSchema,
-  fileType: z.string().optional(),
-  openaiKey: z.string().optional()
+  fileType: z.string().optional()
 })
 
 // Chat validation
 export const chatSchema = z.object({
   message: z.string().min(1, 'Message cannot be empty').max(10000, 'Message too long'),
   contextText: z.string().optional(),
-  fileId: z.string().optional(),
-  openaiKey: z.string().optional()
+  fileId: z.string().optional()
 })
 
 // TTS validation
 export const ttsSchema = z.object({
   text: z.string().min(1, 'Text cannot be empty').max(1000, 'Text too long'),
-  voice: z.string().optional(),
-  openaiKey: z.string().optional()
+  voice: z.string().optional()
 })
 
 // STT validation
 export const sttSchema = z.object({
-  audioFile: z.any().refine((file) => file instanceof File, 'Invalid audio file'),
-  openaiKey: z.string().optional()
+  audioFile: z.any().refine((file) => file instanceof File, 'Invalid audio file')
 })
 
 // Process validation
 export const processSchema = z.object({
-  fileId: z.string().min(1, 'File ID is required'),
-  openaiKey: z.string().optional()
+  fileId: z.string().min(1, 'File ID is required')
 })
 
 // Error response helper

@@ -2,14 +2,14 @@ import { type NextRequest, NextResponse } from "next/server"
 
 export async function POST(request: NextRequest) {
   try {
-    const { text, openaiKey, voice } = await request.json()
+    const { text, voice } = await request.json()
 
     if (!text) {
       return NextResponse.json({ error: "Missing text" }, { status: 400 })
     }
 
-    // Use hardcoded API key for native intelligence
-    const finalOpenaiKey = openaiKey || process.env.OPENAI_API_KEY;
+    // Use server environment variable for API key
+    const finalOpenaiKey = process.env.OPENAI_API_KEY;
     if (!finalOpenaiKey) {
       return NextResponse.json(
         { error: 'OpenAI API key not configured in environment variables.' },

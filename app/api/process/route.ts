@@ -3,7 +3,7 @@ import { AIService } from "@/lib/aiService"
 
 export async function POST(request: NextRequest) {
   try {
-    const { fileId, openaiKey } = await request.json()
+    const { fileId } = await request.json()
 
     if (!fileId) {
       return NextResponse.json({ 
@@ -13,8 +13,8 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Use hardcoded API key for native intelligence
-    const finalOpenaiKey = openaiKey || process.env.OPENAI_API_KEY;
+    // Use server environment variable for OpenAI API key
+    const finalOpenaiKey = process.env.OPENAI_API_KEY;
     if (!finalOpenaiKey) {
       return NextResponse.json(
         { error: 'OpenAI API key not configured in environment variables.' },
