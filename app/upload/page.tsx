@@ -915,15 +915,6 @@ export default function UploadPage() {
           <p className="text-lg text-muted-foreground font-light text-pretty">
             Drag and drop your files or click to browse. We support PDF, Markdown, CSV, audio, and video files.
           </p>
-          <div className="mt-4 flex items-center justify-center">
-            <Button
-              variant="outline"
-              className="font-light bg-transparent"
-              onClick={() => alert('Google Drive integration has been removed in the simplified version')}
-            >
-              Import from Google Drive
-            </Button>
-          </div>
         </div>
 
         {/* Upload Zone */}
