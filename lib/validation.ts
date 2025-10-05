@@ -29,14 +29,16 @@ export const fileUploadSchema = z.object({
 export const documentAnalysisSchema = z.object({
   text: contentSchema,
   fileName: fileNameSchema,
-  fileType: z.string().optional()
+  fileType: z.string().optional(),
+  openaiKey: z.string().optional()
 })
 
 // Chat validation
 export const chatSchema = z.object({
   message: z.string().min(1, 'Message cannot be empty').max(10000, 'Message too long'),
   contextText: z.string().optional(),
-  fileId: z.string().optional()
+  fileId: z.string().optional(),
+  openaiKey: z.string().optional()
 })
 
 // TTS validation

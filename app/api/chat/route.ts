@@ -5,10 +5,10 @@ import { chatSchema, validateRequest, createErrorResponse, APIError } from '@/li
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { message, fileId, contextText } = validateRequest(chatSchema, body)
+    const { message, fileId, contextText, openaiKey } = validateRequest(chatSchema, body)
 
-    // Use server environment variable for API key
-    const finalOpenaiKey = process.env.OPENAI_API_KEY;
+    // Use user-provided API key if available, otherwise fall back to environment variable
+    const finalOpenaiKey = openaiKey || process.env.OPENAI_API_KEY;
     if (!finalOpenaiKey) {
       return NextResponse.json(
         createErrorResponse(500, 'OpenAI API key not configured. Please add your API key in settings.', 'API_KEY_MISSING', {

@@ -5,13 +5,15 @@ import { documentAnalysisSchema, validateRequest, createErrorResponse, APIError 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { text, fileName, fileType } = validateRequest(documentAnalysisSchema, body)
+    const { text, fileName, fileType, openaiKey } = validateRequest(documentAnalysisSchema, body)
 
-    // Use environment variable for API key (secure approach)
-    const finalOpenaiKey = process.env.OPENAI_API_KEY;
+    // Use user-provided API key if available, otherwise fall back to environment variable
+    const finalOpenaiKey = openaiKey || process.env.OPENAI_API_KEY;
     if (!finalOpenaiKey) {
       return NextResponse.json(
-        createErrorResponse(500, 'OpenAI API key not configured in environment variables.', 'API_KEY_MISSING'),
+        createErrorResponse(500, 'OpenAI API key not configured. Please add your API key in settings.', 'API_KEY_MISSING', {
+          suggestion: 'Go to Settings and configure your OpenAI API key to enable AI analysis.'
+        }),
         { status: 500 }
       )
     }
