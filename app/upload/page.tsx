@@ -359,20 +359,26 @@ export default function UploadPage() {
 
       if (!processResponse.ok) {
         let serverMsg = "Processing failed"
+        let errorDetails = ""
         try {
           const data = await processResponse.json()
           serverMsg = data?.error || data?.details || serverMsg
+          errorDetails = data?.suggestion || ""
         } catch {}
+        
+        // More detailed error message
+        const detailedError = `${serverMsg}${errorDetails ? ` - ${errorDetails}` : ''} (Status: ${processResponse.status})`
+        
         // Do not fail the whole upload; mark as completed with a warning so the user can still view the file
         setFiles((prev) => prev.map((f) => (
           f.id === fileId ? {
             ...f,
             status: "completed",
             progress: 100,
-            warning: `AI analysis skipped: ${serverMsg}`
+            warning: `AI analysis skipped: ${detailedError}`
           } : f
         )))
-        toast(serverMsg)
+        toast(detailedError)
         return
       }
 
@@ -386,6 +392,7 @@ export default function UploadPage() {
       let errorMessage = "Processing failed"
       if (error instanceof Error) {
         if (error.name === 'AbortError') errorMessage = "Processing timed out. Please try again."
+        else if (error.message.includes('fetch')) errorMessage = `Network error: ${error.message}`
         else errorMessage = error.message
       }
       // Do not hard-fail: mark completed with warning to keep UX smooth

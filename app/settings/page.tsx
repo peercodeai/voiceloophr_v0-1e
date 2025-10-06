@@ -399,6 +399,41 @@ export default function SettingsPage() {
               </div>
             </Card>
 
+            {/* Test API Connection Button */}
+            {openaiKey && (
+              <div className="flex justify-start mb-4">
+                <Button 
+                  onClick={async () => {
+                    try {
+                      const response = await fetch('/api/analyze', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          text: 'Test document for API key validation.',
+                          fileName: 'test.txt',
+                          fileType: 'text/plain',
+                          openaiKey: openaiKey
+                        })
+                      })
+                      
+                      if (response.ok) {
+                        alert('✅ API key test successful! OpenAI connection working.')
+                      } else {
+                        const error = await response.json()
+                        alert(`❌ API test failed: ${error.message || 'Unknown error'} (Status: ${response.status})`)
+                      }
+                    } catch (error) {
+                      alert(`❌ Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+                    }
+                  }}
+                  variant="outline"
+                  className="font-light"
+                >
+                  Test OpenAI Connection
+                </Button>
+              </div>
+            )}
+
             {/* Save Button */}
             <div className="flex justify-end">
               <Button onClick={handleSave} className="font-light px-8" disabled={!openaiKey && !elevenlabsKey}>
