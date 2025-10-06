@@ -4,15 +4,35 @@ import { documentAnalysisSchema, validateRequest, createErrorResponse, APIError 
 
 export async function POST(request: NextRequest) {
   try {
+    // Log the request for debugging
+    console.log('🔍 Analyze API called at:', new Date().toISOString())
+    console.log('🔑 Environment check:', {
+      hasServerKey: !!process.env.OPENAI_API_KEY,
+      hasUserKey: false // Will be updated below
+    })
+
     const body = await request.json()
     const { text, fileName, fileType, openaiKey } = validateRequest(documentAnalysisSchema, body)
 
     // Use user-provided API key if available, otherwise fall back to environment variable
     const finalOpenaiKey = openaiKey || process.env.OPENAI_API_KEY;
+    
+    console.log('🔑 API Key check:', {
+      hasUserKey: !!openaiKey,
+      hasServerKey: !!process.env.OPENAI_API_KEY,
+      hasFinalKey: !!finalOpenaiKey
+    })
+
     if (!finalOpenaiKey) {
+      console.error('❌ No OpenAI API key available')
       return NextResponse.json(
         createErrorResponse(500, 'OpenAI API key not configured. Please add your API key in settings.', 'API_KEY_MISSING', {
-          suggestion: 'Go to Settings and configure your OpenAI API key to enable AI analysis.'
+          suggestion: 'Go to Settings and configure your OpenAI API key to enable AI analysis.',
+          debug: {
+            hasUserKey: !!openaiKey,
+            hasServerKey: !!process.env.OPENAI_API_KEY,
+            environment: process.env.NODE_ENV
+          }
         }),
         { status: 500 }
       )

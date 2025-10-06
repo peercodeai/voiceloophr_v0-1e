@@ -404,9 +404,32 @@ export default function SettingsPage() {
               </div>
             </Card>
 
-            {/* Test API Connection Button */}
-            {openaiKey && (
-              <div className="flex justify-start mb-4">
+            {/* Test API Connection Buttons */}
+            <div className="flex gap-2 mb-4">
+              <Button 
+                onClick={async () => {
+                  try {
+                    const response = await fetch('/api/health', {
+                      method: 'GET'
+                    })
+                    
+                    if (response.ok) {
+                      const data = await response.json()
+                      alert(`✅ Server health check passed!\n\nEnvironment:\n• OpenAI Key: ${data.environment?.hasOpenAIKey ? '✅ Set' : '❌ Missing'}\n• Supabase: ${data.environment?.hasSupabaseUrl ? '✅ Set' : '❌ Missing'}\n• Node Env: ${data.environment?.nodeEnv}`)
+                    } else {
+                      alert(`❌ Health check failed: Status ${response.status}`)
+                    }
+                  } catch (error) {
+                    alert(`❌ Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+                  }
+                }}
+                variant="outline"
+                className="font-light"
+              >
+                Test Server Health
+              </Button>
+
+              {openaiKey && (
                 <Button 
                   onClick={async () => {
                     try {
@@ -425,7 +448,7 @@ export default function SettingsPage() {
                         alert('✅ API key test successful! OpenAI connection working.')
                       } else {
                         const error = await response.json()
-                        alert(`❌ API test failed: ${error.message || 'Unknown error'} (Status: ${response.status})`)
+                        alert(`❌ API test failed: ${error.message || 'Unknown error'} (Status: ${response.status})\n\nDebug info: ${JSON.stringify(error.debug || {})}`)
                       }
                     } catch (error) {
                       alert(`❌ Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -436,8 +459,8 @@ export default function SettingsPage() {
                 >
                   Test OpenAI Connection
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Save Button */}
             <div className="flex justify-end">
