@@ -991,6 +991,25 @@ export default function UploadPage() {
                </div>
             
             {/* API Key Status */}
+            {process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true' && (
+              <Card className="p-4 border-2 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
+                <div className="flex items-center gap-3">
+                  <div className="h-5 w-5 text-blue-600 dark:text-blue-400">🔑</div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                      Guest Mode - API Keys Required
+                    </p>
+                    <p className="text-xs text-blue-700 dark:text-blue-300">
+                      Enter your OpenAI API key in Settings to enable AI analysis. 
+                      <Link href="/settings" className="text-blue-800 dark:text-blue-200 underline ml-1 hover:text-blue-900 dark:hover:text-blue-100">
+                        Go to Settings
+                      </Link>
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            )}
+
             {!localStorage.getItem("voiceloop_openai_key") && process.env.NEXT_PUBLIC_DISABLE_AUTH !== 'true' && (
               <Card className="p-4 border-2 border-yellow-200 bg-yellow-50">
                 <div className="flex items-center gap-3">

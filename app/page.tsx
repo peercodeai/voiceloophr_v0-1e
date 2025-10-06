@@ -112,6 +112,15 @@ export default function HomePage() {
             semantic search, and instant insights.
           </p>
 
+          {process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true' && (
+            <div className="mb-6 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg max-w-2xl mx-auto">
+              <p className="text-green-800 dark:text-green-200 font-montserrat-light text-center">
+                🎉 <strong>Guest Mode Enabled</strong> - You can use the app directly without signing in! 
+                Just enter your API keys in Settings to get started.
+              </p>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 max-w-4xl mx-auto">
             <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-lg">
               <div className="w-2 h-2 bg-primary rounded-full"></div>
@@ -128,18 +137,37 @@ export default function HomePage() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-md sm:max-w-none mx-auto">
-            <Button size="lg" className="font-montserrat-light text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 w-full sm:w-auto" asChild>
-              <Link href="/upload">
-                Get Started
-                <Zap className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
-              </Link>
-            </Button>
-            <Button variant="outline" size="lg" className="font-montserrat-light text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 bg-transparent w-full sm:w-auto" asChild>
-              <Link href="/dashboard">
-                View Dashboard
-                <LayoutDashboard className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
-              </Link>
-            </Button>
+            {process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true' ? (
+              <>
+                <Button size="lg" className="font-montserrat-light text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 w-full sm:w-auto" asChild>
+                  <Link href="/upload">
+                    Upload Documents
+                    <Zap className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
+                  </Link>
+                </Button>
+                <Button variant="outline" size="lg" className="font-montserrat-light text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 bg-transparent w-full sm:w-auto" asChild>
+                  <Link href="/settings">
+                    Configure API Keys
+                    <LayoutDashboard className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
+                  </Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button size="lg" className="font-montserrat-light text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 w-full sm:w-auto" asChild>
+                  <Link href="/upload">
+                    Get Started
+                    <Zap className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
+                  </Link>
+                </Button>
+                <Button variant="outline" size="lg" className="font-montserrat-light text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 bg-transparent w-full sm:w-auto" asChild>
+                  <Link href="/dashboard">
+                    View Dashboard
+                    <LayoutDashboard className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Auth CTA removed in favor of single nav button */}
