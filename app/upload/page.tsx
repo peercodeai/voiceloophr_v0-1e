@@ -178,20 +178,8 @@ export default function UploadPage() {
       // Add a small delay to show processing status
       await new Promise(resolve => setTimeout(resolve, 500))
 
-      // Check if we have the OpenAI key for AI processing
-      if (!openaiKey && !isDemoMode) {
-        // Mark as completed without AI processing if no key
-        setFiles((prev) => prev.map((f) => f.id === fileId ? { 
-          ...f, 
-          status: "completed", 
-          progress: 100,
-          warning: "File uploaded successfully but AI processing skipped - OpenAI API key not configured"
-        } : f))
-        
-        // Show user-friendly message
-        toast("File was uploaded and processed, but AI analysis was skipped because OpenAI API key is not configured. You can configure it in Settings.")
-        return
-      }
+      // Server will handle OpenAI API key using environment variables
+      // No need to check for client-side API key
 
                      // For PDFs, automatically process with our fixed PDF parser
         if (uploadedFile.file.type.includes('pdf')) {
