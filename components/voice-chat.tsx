@@ -195,15 +195,8 @@ export default function VoiceChat({ fileId, fileName, documentText, documentName
     if (!message.trim()) return
 
     try {
-      // Get API key from multiple sources with better error handling
-      const openaiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY || 
-                       localStorage.getItem("voiceloop_openai_key") ||
-                       process.env.OPENAI_API_KEY
-      
-      if (!openaiKey) {
-        setShowApiKeySetup(true)
-        throw new Error("OpenAI API key not found. Please configure your API key below.")
-      }
+      // Server will handle OpenAI API key using environment variables
+      // No need to check for client-side API key
 
       // Add user message if not from voice
       if (!isVoiceResponse) {
@@ -336,13 +329,11 @@ export default function VoiceChat({ fileId, fileName, documentText, documentName
       const provider = (localStorage.getItem('voiceloop_tts_provider') as 'auto' | 'elevenlabs' | 'openai' | null) || 'auto'
       const elevenlabsKey = localStorage.getItem("voiceloop_elevenlabs_key")
       const elevenlabsVoice = localStorage.getItem('voiceloop_elevenlabs_voice') || ''
-      const openaiKey = localStorage.getItem("voiceloop_openai_key")
-
       setIsSpeaking(true)
 
       // Check if any TTS providers are configured
       const hasElevenLabs = !!elevenlabsKey
-      const hasOpenAI = !!openaiKey || !!process.env.NEXT_PUBLIC_OPENAI_API_KEY
+      const hasOpenAI = !!process.env.NEXT_PUBLIC_OPENAI_API_KEY
       
       if (!hasElevenLabs && !hasOpenAI && provider !== 'browser') {
         // Show helpful message about TTS configuration

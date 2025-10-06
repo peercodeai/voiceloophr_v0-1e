@@ -232,23 +232,20 @@ export default function ResultsPage() {
     }
 
     try {
-      const openaiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY || localStorage.getItem('voiceloop_openai_key')
+      console.log('🚀 Attempting OpenAI analysis...')
       
-      if (openaiKey) {
-        console.log('🚀 Attempting OpenAI analysis...')
-        
-        const response = await fetch('/api/analyze', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            text,
-            fileName,
-            fileType: 'application/pdf',
-            openaiKey
-          })
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text,
+          fileName,
+          fileType: 'application/pdf'
+          // Server will use OPENAI_API_KEY environment variable
         })
+      })
 
-        if (response.ok) {
+      if (response.ok) {
           const result = await response.json()
           console.log('✅ OpenAI analysis successful')
           
@@ -296,15 +293,15 @@ export default function ResultsPage() {
           summary += `**✅ Real AI Analysis Complete**\n`
           summary += `This analysis was generated using OpenAI's GPT-4 model for intelligent business insights.`
           
-          return summary
-        }
+        return summary
+      } else {
+        console.warn('⚠️ OpenAI analysis failed - server may not have API key configured')
+        throw new Error('AI analysis failed - server configuration issue')
       }
     } catch (error) {
       console.error('❌ OpenAI analysis failed:', error)
+      throw error
     }
-
-    // Production: Only OpenAI analysis, no fallbacks
-    return `**Document Summary: ${fileName}**\n\n**Status: AI Analysis Required**\n\n**Current State:**\n• Document text extracted successfully via AWS Textract\n• AI analysis pending - OpenAI API key required\n\n**Next Steps:**\n• Configure OpenAI API key in Settings\n• Re-process document for AI insights\n• Contact administrator if issues persist\n\n**Note:** This is a production system requiring OpenAI integration for document analysis.`
   }
 
   const copyToClipboard = async (text: string) => {
