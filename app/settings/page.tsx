@@ -22,6 +22,11 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
   const [authOpen, setAuthOpen] = useState(false)
+  const [serviceStatus, setServiceStatus] = useState({
+    google: false,
+    microsoft: false,
+    calendar: false
+  })
 
   useEffect(() => {
     // Load saved keys from localStorage
