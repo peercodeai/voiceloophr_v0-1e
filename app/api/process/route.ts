@@ -62,12 +62,28 @@ export async function POST(request: NextRequest) {
     const isMarkdownFile = fileData.name.toLowerCase().endsWith('.md') || fileData.type.includes('markdown')
     
     try {
-      const summaryResult = await AIService.analyzeDocument(
-        fileData.extractedText, 
-        finalOpenaiKey, 
-        'summarize'
-      )
-      summary = summaryResult.content
+      // Use the new /api/analyze endpoint with timeout protection
+      console.log('🔍 Calling /api/analyze for document processing...')
+      const analyzeResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/analyze`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: fileData.extractedText,
+          fileName: fileData.name || 'document',
+          fileType: fileData.type || 'text/plain',
+          openaiKey: finalOpenaiKey
+        })
+      })
+
+      if (analyzeResponse.ok) {
+        const analyzeResult = await analyzeResponse.json()
+        summary = analyzeResult.analysis.summary
+        console.log('✅ AI analysis completed via /api/analyze')
+      } else {
+        throw new Error(`Analysis failed: ${analyzeResponse.status}`)
+      }
     } catch (summaryError) {
       console.error("Summary generation error:", summaryError)
       
