@@ -39,10 +39,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Initialize OpenAI service
+    console.log('🤖 Initializing OpenAI service...')
     const openaiService = new OpenAIService({ apiKey: finalOpenaiKey })
 
     // Perform real AI analysis
+    console.log('🔍 Starting document analysis...')
     const analysis = await openaiService.analyzeDocument(text, fileName, fileType)
+    console.log('✅ Analysis completed successfully')
 
     return NextResponse.json({
       success: true,
@@ -51,7 +54,16 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('AI analysis API error:', error)
+    console.error('❌ AI analysis API error:', error)
+    
+    // More detailed error logging
+    if (error instanceof Error) {
+      console.error('❌ Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack?.split('\n').slice(0, 3).join('\n')
+      })
+    }
     
     if (error instanceof APIError) {
       return NextResponse.json(
@@ -60,10 +72,22 @@ export async function POST(request: NextRequest) {
       )
     }
     
+    // Check for specific error types
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const isNetworkError = errorMessage.includes('fetch') || errorMessage.includes('network')
+    const isTimeoutError = errorMessage.includes('timeout')
+    const isOpenAIError = errorMessage.includes('OpenAI') || errorMessage.includes('API')
+    
     return NextResponse.json(
       createErrorResponse(500, 'AI analysis failed', 'ANALYSIS_ERROR', {
-        details: error instanceof Error ? error.message : 'Unknown error',
-        fallback: 'Using basic text analysis instead'
+        details: errorMessage,
+        errorType: isNetworkError ? 'network' : isTimeoutError ? 'timeout' : isOpenAIError ? 'openai' : 'unknown',
+        fallback: 'Using basic text analysis instead',
+        debug: {
+          hasUserKey: !!openaiKey,
+          hasServerKey: !!process.env.OPENAI_API_KEY,
+          environment: process.env.NODE_ENV
+        }
       }),
       { status: 500 }
     )

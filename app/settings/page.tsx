@@ -430,35 +430,63 @@ export default function SettingsPage() {
               </Button>
 
               {openaiKey && (
-                <Button 
-                  onClick={async () => {
-                    try {
-                      const response = await fetch('/api/analyze', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          text: 'Test document for API key validation.',
-                          fileName: 'test.txt',
-                          fileType: 'text/plain',
-                          openaiKey: openaiKey
+                <>
+                  <Button 
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('/api/test-openai', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ apiKey: openaiKey })
                         })
-                      })
-                      
-                      if (response.ok) {
-                        alert('✅ API key test successful! OpenAI connection working.')
-                      } else {
-                        const error = await response.json()
-                        alert(`❌ API test failed: ${error.message || 'Unknown error'} (Status: ${response.status})\n\nDebug info: ${JSON.stringify(error.debug || {})}`)
+                        
+                        if (response.ok) {
+                          const result = await response.json()
+                          alert(`✅ Simple test successful!\n\nResponse: ${result.response}`)
+                        } else {
+                          const error = await response.json()
+                          alert(`❌ Simple test failed: ${error.error || 'Unknown error'} (Status: ${response.status})`)
+                        }
+                      } catch (error) {
+                        alert(`❌ Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
                       }
-                    } catch (error) {
-                      alert(`❌ Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
-                    }
-                  }}
-                  variant="outline"
-                  className="font-light"
-                >
-                  Test OpenAI Connection
-                </Button>
+                    }}
+                    variant="outline"
+                    className="font-light"
+                  >
+                    Test Simple OpenAI
+                  </Button>
+
+                  <Button 
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('/api/analyze', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            text: 'Test document for API key validation.',
+                            fileName: 'test.txt',
+                            fileType: 'text/plain',
+                            openaiKey: openaiKey
+                          })
+                        })
+                        
+                        if (response.ok) {
+                          alert('✅ Full analysis test successful! OpenAI connection working.')
+                        } else {
+                          const error = await response.json()
+                          alert(`❌ Analysis test failed: ${error.message || 'Unknown error'} (Status: ${response.status})\n\nDebug info: ${JSON.stringify(error.debug || {})}`)
+                        }
+                      } catch (error) {
+                        alert(`❌ Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+                      }
+                    }}
+                    variant="outline"
+                    className="font-light"
+                  >
+                    Test Full Analysis
+                  </Button>
+                </>
               )}
             </div>
 

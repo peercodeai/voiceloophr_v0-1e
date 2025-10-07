@@ -87,36 +87,46 @@ Focus on business value, actionable insights, risk assessment, and professional 
   }
 
   private async callOpenAI(prompt: string): Promise<string> {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.config.apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: this.config.model,
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a professional business analyst specializing in document analysis. Provide clear, actionable insights in the exact JSON format requested.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        max_tokens: this.config.maxTokens,
-        temperature: this.config.temperature,
-      }),
-    })
+    console.log('🌐 Making OpenAI API call...')
+    console.log('🔑 API Key prefix:', this.config.apiKey?.substring(0, 10) + '...')
+    
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.config.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: this.config.model,
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a professional business analyst specializing in document analysis. Provide clear, actionable insights in the exact JSON format requested.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          max_tokens: this.config.maxTokens,
+          temperature: this.config.temperature,
+        }),
+      })
 
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(`OpenAI API error: ${error.error?.message || response.statusText}`)
+      console.log('📡 OpenAI API response status:', response.status)
+
+      if (!response.ok) {
+        const error = await response.json()
+        console.error('❌ OpenAI API error response:', error)
+        throw new Error(`OpenAI API error: ${error.error?.message || response.statusText}`)
+      }
+      const data = await response.json()
+      return data.choices[0]?.message?.content || ''
+    } catch (error) {
+      console.error('❌ OpenAI API call failed:', error)
+      throw error
     }
-
-    const data = await response.json()
-    return data.choices[0]?.message?.content || ''
   }
 
   private parseAnalysisResponse(response: string, originalText: string): DocumentAnalysis {
@@ -189,14 +199,14 @@ Focus on business value, actionable insights, risk assessment, and professional 
         `Content length: ${wordCount} words`,
         'Ready for analysis and search'
       ],
+      mainTopics: ['Document Processing'],
+      documentType: 'Business Document',
+      wordCount: wordCount,
       sentiment: 'neutral',
       confidence: 0.7,
-      metadata: {
-        fallback: true,
-        wordCount,
-        charCount,
-        processedAt: new Date().toISOString()
-      }
+      recommendations: ['Review document content'],
+      riskFactors: ['Standard document risks'],
+      actionItems: ['Process additional documents']
     }
   }
 }
