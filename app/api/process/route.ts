@@ -24,11 +24,27 @@ export async function POST(request: NextRequest) {
 
     // Get file from memory storage
     global.uploadedFiles = global.uploadedFiles || new Map()
+    console.log(`🔍 Looking for fileId: ${fileId}`)
+    console.log(`📊 Total files in global storage: ${global.uploadedFiles.size}`)
+    console.log(`📋 Available fileIds: ${Array.from(global.uploadedFiles.keys()).join(', ')}`)
+    
     const fileData = global.uploadedFiles.get(fileId)
 
     if (!fileData) {
-      return NextResponse.json({ error: "File not found" }, { status: 404 })
+      console.error(`❌ File not found in global storage: ${fileId}`)
+      return NextResponse.json({ 
+        error: "File not found", 
+        details: `File ${fileId} not found in server memory`,
+        suggestion: "Please try uploading the file again",
+        debug: {
+          requestedFileId: fileId,
+          totalFiles: global.uploadedFiles.size,
+          availableFileIds: Array.from(global.uploadedFiles.keys())
+        }
+      }, { status: 404 })
     }
+    
+    console.log(`✅ File found: ${fileData.name} (${fileData.type})`)
 
     // Check if file has already been processed
     if (!fileData.extractedText) {
