@@ -250,45 +250,59 @@ export default function ResultsPage() {
           console.log('✅ OpenAI analysis successful')
           
           const analysis = result.analysis
+          if (!analysis) {
+            throw new Error('AI analysis returned null - server processing issue')
+          }
+          
           let summary = `**Document Summary: ${fileName}**\n\n`
           summary += `**Document Overview:**\n`
-          summary += `• Total words: ${analysis.wordCount} (OpenAI)\n`
-          summary += `• Document Type: ${analysis.documentType}\n`
+          summary += `• Total words: ${analysis.wordCount || 'Unknown'} (OpenAI)\n`
+          summary += `• Document Type: ${analysis.documentType || 'Unknown'}\n`
           summary += `• Processing method: AWS Textract + OpenAI GPT-4\n`
-          summary += `• AI Confidence: ${analysis.confidence}%\n`
-          summary += `• Sentiment: ${analysis.sentiment.charAt(0).toUpperCase() + analysis.sentiment.slice(1)}\n\n`
+          summary += `• AI Confidence: ${analysis.confidence || 0}%\n`
+          summary += `• Sentiment: ${analysis.sentiment ? analysis.sentiment.charAt(0).toUpperCase() + analysis.sentiment.slice(1) : 'Unknown'}\n\n`
           
-          summary += `**AI-Generated Summary:**\n${analysis.summary}\n\n`
+          summary += `**AI-Generated Summary:**\n${analysis.summary || 'Summary not available'}\n\n`
           
-          summary += `**Key Business Points:**\n`
-          analysis.keyPoints.slice(0, 5).forEach((point: string) => {
-            summary += `• ${point}\n`
-          })
-          summary += `\n`
+          if (analysis.keyPoints && analysis.keyPoints.length > 0) {
+            summary += `**Key Business Points:**\n`
+            analysis.keyPoints.slice(0, 5).forEach((point: string) => {
+              summary += `• ${point}\n`
+            })
+            summary += `\n`
+          }
           
-          summary += `**Main Business Topics:**\n`
-          analysis.mainTopics.slice(0, 3).forEach((topic: string) => {
-            summary += `• ${topic}\n`
-          })
-          summary += `\n`
+          if (analysis.mainTopics && analysis.mainTopics.length > 0) {
+            summary += `**Main Business Topics:**\n`
+            analysis.mainTopics.slice(0, 3).forEach((topic: string) => {
+              summary += `• ${topic}\n`
+            })
+            summary += `\n`
+          }
           
-          summary += `**Business Recommendations:**\n`
-          analysis.recommendations.slice(0, 3).forEach((rec: string) => {
-            summary += `• ${rec}\n`
-          })
-          summary += `\n`
+          if (analysis.recommendations && analysis.recommendations.length > 0) {
+            summary += `**Business Recommendations:**\n`
+            analysis.recommendations.slice(0, 3).forEach((rec: string) => {
+              summary += `• ${rec}\n`
+            })
+            summary += `\n`
+          }
           
-          summary += `**Risk Factors Identified:**\n`
-          analysis.riskFactors.slice(0, 3).forEach((risk: string) => {
-            summary += `• ${risk}\n`
-          })
-          summary += `\n`
+          if (analysis.riskFactors && analysis.riskFactors.length > 0) {
+            summary += `**Risk Factors Identified:**\n`
+            analysis.riskFactors.slice(0, 3).forEach((risk: string) => {
+              summary += `• ${risk}\n`
+            })
+            summary += `\n`
+          }
           
-          summary += `**Action Items:**\n`
-          analysis.actionItems.slice(0, 3).forEach((action: string) => {
-            summary += `• ${action}\n`
-          })
-          summary += `\n`
+          if (analysis.actionItems && analysis.actionItems.length > 0) {
+            summary += `**Action Items:**\n`
+            analysis.actionItems.slice(0, 3).forEach((action: string) => {
+              summary += `• ${action}\n`
+            })
+            summary += `\n`
+          }
           
           summary += `**✅ Real AI Analysis Complete**\n`
           summary += `This analysis was generated using OpenAI's GPT-4 model for intelligent business insights.`

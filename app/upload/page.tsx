@@ -116,12 +116,12 @@ export default function UploadPage() {
 
       const uploadResult = await uploadResponse.json()
 
-      // Save to localStorage for persistence (client-side)
+      // Save to localStorage for persistence (client-side) with quota protection
       try {
         // Optionally capture a small base64 for viewer fallback (only for small files)
         let localBase64: string | undefined = undefined
         try {
-          const SMALL_FILE_LIMIT = 8 * 1024 * 1024 // 8MB
+          const SMALL_FILE_LIMIT = 2 * 1024 * 1024 // Reduced to 2MB to prevent quota issues
           if (uploadedFile.file.size <= SMALL_FILE_LIMIT) {
             const readAsBase64 = (file: File) => new Promise<string>((resolve, reject) => {
               const reader = new FileReader()
@@ -135,7 +135,9 @@ export default function UploadPage() {
             })
             localBase64 = await readAsBase64(uploadedFile.file)
           }
-        } catch {}
+        } catch (error) {
+          console.warn('Failed to create base64 preview:', error)
+        }
 
         const fileData = {
           id: uploadResult.fileId,
@@ -159,11 +161,45 @@ export default function UploadPage() {
           }
         }
         
-        // Save to localStorage
-        const existing = JSON.parse(localStorage.getItem('voiceloop_uploaded_files') || '{}')
-        existing[uploadResult.fileId] = fileData
-        localStorage.setItem('voiceloop_uploaded_files', JSON.stringify(existing))
-        console.log(`✅ File ${uploadResult.fileId} saved to localStorage`)
+        // Save to localStorage with quota protection
+        try {
+          const existing = JSON.parse(localStorage.getItem('voiceloop_uploaded_files') || '{}')
+          existing[uploadResult.fileId] = fileData
+          
+          const dataToStore = JSON.stringify(existing)
+          // Check if data is too large (localStorage has ~5-10MB limit)
+          if (dataToStore.length > 4 * 1024 * 1024) { // 4MB limit
+            console.warn("⚠️ File data too large for localStorage, clearing old files")
+            // Keep only the 5 most recent files
+            const fileIds = Object.keys(existing).sort((a, b) => {
+              const timeA = existing[a].uploadedAt || 0
+              const timeB = existing[b].uploadedAt || 0
+              return timeB - timeA
+            })
+            
+            const recentFiles = {}
+            fileIds.slice(0, 5).forEach(id => {
+              recentFiles[id] = existing[id]
+            })
+            
+            localStorage.setItem('voiceloop_uploaded_files', JSON.stringify(recentFiles))
+            console.log(`✅ Cleared old files, kept ${Object.keys(recentFiles).length} recent files`)
+          } else {
+            localStorage.setItem('voiceloop_uploaded_files', dataToStore)
+            console.log(`✅ File ${uploadResult.fileId} saved to localStorage`)
+          }
+        } catch (quotaError) {
+          console.warn('⚠️ localStorage quota exceeded, clearing all files:', quotaError)
+          // Clear all files and save only this one
+          try {
+            const minimalData = { [uploadResult.fileId]: fileData }
+            localStorage.setItem('voiceloop_uploaded_files', JSON.stringify(minimalData))
+            console.log(`✅ Cleared storage and saved current file only`)
+          } catch (finalError) {
+            console.error('❌ Failed to save to localStorage even after clearing:', finalError)
+            // Don't fail the upload - just continue without localStorage
+          }
+        }
       } catch (error) {
         console.warn('Failed to save to localStorage:', error)
       }
