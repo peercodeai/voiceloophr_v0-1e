@@ -42,9 +42,22 @@ export async function POST(request: NextRequest) {
     console.log('🤖 Initializing OpenAI service...')
     const openaiService = new OpenAIService({ apiKey: finalOpenaiKey })
 
-    // Perform real AI analysis
+    // Check text size to prevent timeouts
+    if (text.length > 10000) {
+      console.log('⚠️ Large text detected, truncating to prevent timeout')
+      text = text.substring(0, 10000) + '... [truncated]'
+    }
+
+    // Perform real AI analysis with timeout
     console.log('🔍 Starting document analysis...')
-    const analysis = await openaiService.analyzeDocument(text, fileName, fileType)
+    console.log('📏 Text length:', text.length)
+    
+    const analysisPromise = openaiService.analyzeDocument(text, fileName, fileType)
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Analysis timeout after 25 seconds')), 25000)
+    )
+    
+    const analysis = await Promise.race([analysisPromise, timeoutPromise])
     console.log('✅ Analysis completed successfully')
 
     return NextResponse.json({
