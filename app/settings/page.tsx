@@ -228,43 +228,6 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* ElevenLabs API Key */}
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-montserrat-light mb-2">ElevenLabs API Key</h3>
-                  <p className="text-sm text-muted-foreground font-montserrat-light mb-4">
-                    Required for high-quality text-to-speech and voice responses
-                  </p>
-                </div>
-
-                <div className="space-y-3">
-                  <Label htmlFor="elevenlabs-key" className="text-sm font-montserrat-light">
-                    API Key
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="elevenlabs-key"
-                      type={showElevenlabsKey ? "text" : "password"}
-                      placeholder="sk_..."
-                      value={elevenlabsKey}
-                      onChange={(e) => setElevenlabsKey(e.target.value)}
-                      className="pr-10 font-mono text-sm"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3"
-                      onClick={() => setShowElevenlabsKey(!showElevenlabsKey)}
-                    >
-                      {showElevenlabsKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                  {elevenlabsKey && !showElevenlabsKey && (
-                    <p className="text-xs text-muted-foreground font-mono">Current: {maskKey(elevenlabsKey)}</p>
-                  )}
-                </div>
-              </div>
             </Card>
 
             {/* TTS Settings */}
@@ -274,132 +237,23 @@ export default function SettingsPage() {
                 <h3 className="text-xl font-montserrat-light">Text-to-Speech Configuration</h3>
               </div>
               <p className="text-sm text-muted-foreground font-montserrat-light mb-4">
-                Configure voice providers for AI responses. Choose the best option based on your needs and API keys.
+                Voice responses use OpenAI TTS with your existing API key. No additional configuration needed.
               </p>
               
               <div className="space-y-4">
-                <div>
-                  <Label className="text-sm font-montserrat-light">Voice Provider</Label>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
-                    <label className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
-                      ttsProvider === 'auto' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-                    }`}>
-                      <input 
-                        type="radio" 
-                        name="tts" 
-                        value="auto" 
-                        checked={ttsProvider === 'auto'} 
-                        onChange={() => setTtsProvider('auto')} 
-                        className="mt-1"
-                      />
-                      <div>
-                        <div className="font-medium text-sm">Auto (Recommended)</div>
-                        <div className="text-xs text-muted-foreground">Tries ElevenLabs first, falls back to OpenAI</div>
-                      </div>
-                    </label>
-                    
-                    <label className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
-                      ttsProvider === 'elevenlabs' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-                    }`}>
-                      <input 
-                        type="radio" 
-                        name="tts" 
-                        value="elevenlabs" 
-                        checked={ttsProvider === 'elevenlabs'} 
-                        onChange={() => setTtsProvider('elevenlabs')} 
-                        className="mt-1"
-                      />
-                      <div>
-                        <div className="font-medium text-sm">ElevenLabs</div>
-                        <div className="text-xs text-muted-foreground">High-quality voices, requires API key</div>
-                      </div>
-                    </label>
-                    
-                    <label className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
-                      ttsProvider === 'openai' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-                    }`}>
-                      <input 
-                        type="radio" 
-                        name="tts" 
-                        value="openai" 
-                        checked={ttsProvider === 'openai'} 
-                        onChange={() => setTtsProvider('openai')} 
-                        className="mt-1"
-                      />
-                      <div>
-                        <div className="font-medium text-sm">OpenAI</div>
-                        <div className="text-xs text-muted-foreground">Uses your existing OpenAI API key</div>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Status indicators */}
+                {/* Status indicator */}
                 <div className="flex flex-wrap gap-2">
-                  {elevenlabsKey ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                      <CheckCircle className="h-3 w-3" />
-                      ElevenLabs configured
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                      <XCircle className="h-3 w-3" />
-                      ElevenLabs not configured
-                    </span>
-                  )}
-                  
                   {(openaiKey || process.env.NEXT_PUBLIC_OPENAI_API_KEY) ? (
                     <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
                       <CheckCircle className="h-3 w-3" />
-                      OpenAI configured
+                      OpenAI TTS Ready
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
                       <XCircle className="h-3 w-3" />
-                      OpenAI not configured
+                      OpenAI API key required for voice features
                     </span>
                   )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-light">ElevenLabs Voice</Label>
-                  <div className="flex gap-2 items-center">
-                    <select
-                      className="w-full px-3 py-2 border rounded-md bg-background text-foreground"
-                      value={elevenlabsVoice}
-                      onChange={(e) => setElevenlabsVoice(e.target.value)}
-                      onFocus={async (e) => {
-                        // Lazy-load voice list when user opens the dropdown
-                        try {
-                          const el = e.currentTarget as HTMLSelectElement
-                          if (el.options.length > 1) return
-                          const key = localStorage.getItem('voiceloop_elevenlabs_key')
-                          if (!key) { alert('Add ElevenLabs key first'); return }
-                          const resp = await fetch('/api/tts/voices', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ elevenlabsKey: key }) })
-                          const data = await resp.json()
-                          if (!resp.ok || !data?.voices) { alert(data?.error || 'Failed to fetch voices'); return }
-                          // Clear old options except current value placeholder
-                          while (el.options.length) el.remove(0)
-                          el.add(new Option('Select a voice...', ''))
-                          for (const v of data.voices as Array<{ id: string; name: string }>) {
-                            el.add(new Option(`${v.name} — ${v.id}`, v.id))
-                          }
-                        } catch (err) {
-                          alert('Failed to load voices')
-                        }
-                      }}
-                    >
-                      <option value="">Select a voice...</option>
-                      {elevenlabsVoice && <option value={elevenlabsVoice}>{elevenlabsVoice}</option>}
-                    </select>
-                    <Input
-                      placeholder="or type name/ID"
-                      value={elevenlabsVoice}
-                      onChange={(e) => setElevenlabsVoice(e.target.value)}
-                      className="font-mono text-sm max-w-[220px]"
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground">Dropdown lists your 11labs voices; you can also paste a custom ID.</p>
                 </div>
               </div>
             </Card>
@@ -503,13 +357,10 @@ export default function SettingsPage() {
               <h3 className="text-lg font-light mb-3">Security Notice</h3>
               <div className="space-y-2 text-sm text-muted-foreground font-light">
                 <p>• API keys are stored locally in your browser and never sent to our servers</p>
-                <p>• Keys are used only for direct API calls to OpenAI and ElevenLabs</p>
+                <p>• Keys are used only for direct API calls to OpenAI</p>
                 <p>• You can clear your keys anytime by clearing browser data</p>
                 <p>
                   • Get your OpenAI key at: <span className="font-mono">platform.openai.com</span>
-                </p>
-                <p>
-                  • Get your ElevenLabs key at: <span className="font-mono">elevenlabs.io</span>
                 </p>
               </div>
             </Card>

@@ -326,22 +326,16 @@ export default function VoiceChat({ fileId, fileName, documentText, documentName
 
   const speakResponse = async (text: string) => {
     try {
-      // Determine TTS provider preference
-      const provider = (localStorage.getItem('voiceloop_tts_provider') as 'auto' | 'elevenlabs' | 'openai' | null) || 'auto'
-      const elevenlabsKey = localStorage.getItem("voiceloop_elevenlabs_key")
-      const elevenlabsVoice = localStorage.getItem('voiceloop_elevenlabs_voice') || ''
-      setIsSpeaking(true)
-
-      // Check if any TTS providers are configured
-      const hasElevenLabs = !!elevenlabsKey
+      // Use OpenAI TTS by default
       const hasOpenAI = !!process.env.NEXT_PUBLIC_OPENAI_API_KEY
+      setIsSpeaking(true)
       
-      if (!hasElevenLabs && !hasOpenAI) {
+      if (!hasOpenAI) {
         // Show helpful message about TTS configuration
         const configMessage: Message = {
           id: (Date.now() + 1).toString(),
           type: "assistant",
-          content: "🔊 **Text-to-Speech Setup Required**\n\nTo use voice features, please configure TTS in Settings:\n\n• **ElevenLabs**: Get free API key at [elevenlabs.io](https://elevenlabs.io)\n• **OpenAI TTS**: Uses your existing OpenAI API key\n• **Browser TTS**: Uses your device's built-in speech synthesis\n\nGo to Settings → TTS Configuration to set up voice features.",
+          content: "🔊 **Voice Setup Required**\n\nTo use voice features, please configure your OpenAI API key in Settings.\n\nVoice responses use OpenAI TTS with your existing API key - no additional setup needed!",
           timestamp: new Date(),
         }
         setMessages((prev) => [...prev, configMessage])
@@ -385,47 +379,22 @@ export default function VoiceChat({ fileId, fileName, documentText, documentName
         }
       }
 
-      const tryElevenLabs = async (): Promise<boolean> => {
-        if (!elevenlabsKey) return false
-        try {
-          const resp = await fetch('/api/tts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: text.slice(0, 1000), elevenlabsKey, voiceId: elevenlabsVoice || undefined })
-          })
-          if (!resp.ok) throw new Error(await resp.text())
-          const blob = await resp.blob()
-          await playBlob(blob)
-          return true
-        } catch (e) {
-          console.warn('ElevenLabs TTS failed, falling back:', e)
-          return false
-        }
-      }
-
-      const tryOpenAITTS = async (): Promise<boolean> => {
-        try {
-          // Use hardcoded API key for native intelligence
-          const openaiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY || ""
-          const resp = await fetch('/api/tts/openai', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(openaiKey ? { text: text.slice(0, 800), openaiKey, voice: 'alloy' } : { text: text.slice(0, 800), voice: 'alloy' })
-          })
-          if (!resp.ok) throw new Error(await resp.text())
-          const blob = await resp.blob()
-          await playBlob(blob)
-          return true
-        } catch (e) {
-          console.warn('OpenAI TTS failed:', e)
-          return false
-        }
-      }
-
+      // Try OpenAI TTS
       let ok = false
-      if (provider === 'elevenlabs') ok = await tryElevenLabs()
-      else if (provider === 'openai') ok = await tryOpenAITTS()
-      else ok = (await tryElevenLabs()) || (await tryOpenAITTS())
+      try {
+        const resp = await fetch('/api/tts/openai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: text.slice(0, 800), voice: 'alloy' })
+        })
+        if (!resp.ok) throw new Error(await resp.text())
+        const blob = await resp.blob()
+        await playBlob(blob)
+        ok = true
+      } catch (e) {
+        console.warn('OpenAI TTS failed:', e)
+      }
+      
       if (!ok) {
         // Final fallback: use browser Web Speech API if available
         try {
@@ -461,16 +430,16 @@ export default function VoiceChat({ fileId, fileName, documentText, documentName
       const errorMessage = error instanceof Error ? error.message : (typeof error === 'string' ? error : 'Unknown error')
       
       if (errorMessage.includes('API key')) {
-        errorContent += "\n\n**API Key Issue**: Please check your TTS API keys in Settings:\n• Verify ElevenLabs API key is valid\n• Ensure OpenAI API key is configured\n• Try using Browser TTS as fallback"
+        errorContent += "\n\n**API Key Issue**: Please check your OpenAI API key in Settings:\n• Ensure OpenAI API key is configured\n• Try using Browser TTS as fallback"
       } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
         errorContent += "\n\n**Network Issue**: Check your internet connection and try again.\n• Voice services require stable internet\n• Try refreshing the page if issues persist"
       } else if (errorMessage.includes('browser') || errorMessage.includes('SpeechSynthesis')) {
         errorContent += "\n\n**Browser Compatibility**: Your browser may not support voice features.\n• Try Chrome, Firefox, or Safari\n• Enable audio permissions\n• Check browser audio settings"
       } else {
-        errorContent += `\n\n**Error**: ${errorMessage}\n\n**Troubleshooting**:\n• Check Settings → TTS Configuration\n• Try switching TTS providers\n• Refresh the page and try again`
+        errorContent += `\n\n**Error**: ${errorMessage}\n\n**Troubleshooting**:\n• Check Settings → OpenAI API Key\n• Refresh the page and try again`
       }
       
-      errorContent += "\n\n💡 **Tip**: Go to Settings to configure voice providers or use the text interface."
+      errorContent += "\n\n💡 **Tip**: Go to Settings to configure your OpenAI API key or use the text interface."
       
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
