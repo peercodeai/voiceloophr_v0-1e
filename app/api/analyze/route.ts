@@ -13,6 +13,10 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const { text, fileName, fileType, openaiKey } = validateRequest(documentAnalysisSchema, body)
+    
+    // Provide defaults for optional fields
+    const finalFileName = fileName || 'document'
+    const finalFileType = fileType || 'text/plain'
 
     // Use user-provided API key if available, otherwise fall back to environment variable
     const finalOpenaiKey = openaiKey || process.env.OPENAI_API_KEY;
@@ -52,7 +56,7 @@ export async function POST(request: NextRequest) {
     console.log('🔍 Starting document analysis...')
     console.log('📏 Text length:', text.length)
     
-    const analysisPromise = openaiService.analyzeDocument(text, fileName, fileType)
+    const analysisPromise = openaiService.analyzeDocument(text, finalFileName, finalFileType)
     const timeoutPromise = new Promise((_, reject) => 
       setTimeout(() => reject(new Error('Analysis timeout after 25 seconds')), 25000)
     )

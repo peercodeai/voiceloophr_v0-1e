@@ -28,7 +28,7 @@ export const fileUploadSchema = z.object({
 // Document analysis validation
 export const documentAnalysisSchema = z.object({
   text: contentSchema,
-  fileName: fileNameSchema,
+  fileName: fileNameSchema.optional(),
   fileType: z.string().optional(),
   openaiKey: z.string().optional()
 })
