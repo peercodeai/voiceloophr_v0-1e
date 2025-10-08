@@ -132,12 +132,14 @@ export default function VoiceChat({ fileId, fileName, documentText, documentName
 
   const processVoiceInput = async (audioBlob: Blob) => {
     try {
-      // Use hardcoded API key for native intelligence
-      const openaiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY
+      // Prefer not to send undefined; allow server env fallback
+      const openaiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY || ""
 
       const formData = new FormData()
       formData.append("audio", audioBlob, "recording.wav")
-      formData.append("openaiKey", openaiKey)
+      if (openaiKey) {
+        formData.append("openaiKey", openaiKey)
+      }
 
       const response = await fetch("/api/stt", {
         method: "POST",
@@ -271,7 +273,6 @@ export default function VoiceChat({ fileId, fileName, documentText, documentName
         body: JSON.stringify({
           message,
           fileId,
-          openaiKey,
           contextText: documentText && documentText.length > 0 ? String(documentText).slice(0, 12000) : contextText,
         }),
       })
@@ -335,7 +336,7 @@ export default function VoiceChat({ fileId, fileName, documentText, documentName
       const hasElevenLabs = !!elevenlabsKey
       const hasOpenAI = !!process.env.NEXT_PUBLIC_OPENAI_API_KEY
       
-      if (!hasElevenLabs && !hasOpenAI && provider !== 'browser') {
+      if (!hasElevenLabs && !hasOpenAI) {
         // Show helpful message about TTS configuration
         const configMessage: Message = {
           id: (Date.now() + 1).toString(),
@@ -405,11 +406,11 @@ export default function VoiceChat({ fileId, fileName, documentText, documentName
       const tryOpenAITTS = async (): Promise<boolean> => {
         try {
           // Use hardcoded API key for native intelligence
-          const openaiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY
+          const openaiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY || ""
           const resp = await fetch('/api/tts/openai', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: text.slice(0, 800), openaiKey, voice: 'alloy' })
+            body: JSON.stringify(openaiKey ? { text: text.slice(0, 800), openaiKey, voice: 'alloy' } : { text: text.slice(0, 800), voice: 'alloy' })
           })
           if (!resp.ok) throw new Error(await resp.text())
           const blob = await resp.blob()

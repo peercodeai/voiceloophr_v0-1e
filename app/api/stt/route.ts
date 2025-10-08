@@ -4,7 +4,8 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
     const audioFile = formData.get("audio") as File
-    const userOpenaiKey = formData.get("openaiKey") as string
+    const rawKey = formData.get("openaiKey")
+    const userOpenaiKey = typeof rawKey === 'string' && rawKey.trim().length > 0 ? rawKey : undefined
 
     if (!audioFile) {
       return NextResponse.json({ error: "Missing audio file" }, { status: 400 })
