@@ -218,3 +218,11 @@ coverage/
 # Local development
 .local/
 local/
+
+# AWS Infrastructure sensitive files
+aws-infrastructure/terraform/terraform.tfvars
+aws-infrastructure/terraform/terraform.tfstate*
+aws-infrastructure/terraform/.terraform/
+aws-infrastructure/terraform/*.pem
+aws-infrastructure/terraform/tfplan
+aws-infrastructure/terraform/.terraform.lock.hcl

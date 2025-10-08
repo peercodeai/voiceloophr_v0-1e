@@ -8,6 +8,14 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.0"
+    }
   }
 }
 
@@ -82,14 +90,26 @@ resource "aws_security_group" "voiceloop_sg" {
   }
 }
 
-# Key Pair for EC2 access
+# Key Pair for EC2 access - Generate a new key pair
+resource "tls_private_key" "voiceloop_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
 resource "aws_key_pair" "voiceloop_key" {
   key_name   = "voiceloop-hr-key"
-  public_key = file("~/.ssh/id_rsa.pub") # Update this path as needed
+  public_key = tls_private_key.voiceloop_key.public_key_openssh
 
   tags = {
     Name = "voiceloop-hr-key"
   }
+}
+
+# Save private key locally
+resource "local_file" "private_key" {
+  content         = tls_private_key.voiceloop_key.private_key_pem
+  filename        = "${path.module}/voiceloop-hr-key.pem"
+  file_permission = "0600"
 }
 
 # IAM Role for EC2
@@ -227,7 +247,7 @@ resource "aws_db_instance" "voiceloop_db" {
   identifier = "voiceloop-hr-db"
   
   engine         = "postgres"
-  engine_version = "15.4"
+  engine_version = "16.3"
   instance_class = var.db_instance_class
   
   allocated_storage     = 20

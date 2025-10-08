@@ -47,23 +47,21 @@ POSTGRES_PASSWORD=${db_password}
 POSTGRES_HOST=${db_host}
 POSTGRES_PORT=5432
 
-# AWS Configuration
+# AWS Configuration (will be set via EC2 IAM role)
 AWS_REGION=${aws_region}
 AWS_S3_BUCKET=${s3_bucket}
-AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 
-# OpenAI Configuration
-OPENAI_API_KEY=${OPENAI_API_KEY}
+# OpenAI Configuration (to be set manually after deployment)
+# OPENAI_API_KEY=your-key-here
 
-# Supabase Configuration (if using)
-NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+# Supabase Configuration (optional - set if needed)
+# NEXT_PUBLIC_SUPABASE_URL=
+# NEXT_PUBLIC_SUPABASE_ANON_KEY=
+# SUPABASE_SERVICE_ROLE_KEY=
 
 # Application Configuration
 NEXTAUTH_URL=http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
-NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+NEXTAUTH_SECRET=$(openssl rand -base64 32)
 NODE_ENV=production
 NEXT_PUBLIC_DISABLE_AUTH=true
 
@@ -71,8 +69,8 @@ NEXT_PUBLIC_DISABLE_AUTH=true
 MAX_FILE_SIZE=100MB
 UPLOAD_DIR=/opt/voiceloophr/uploads
 
-# Redis Configuration (if using)
-REDIS_URL=${REDIS_URL}
+# Redis Configuration (optional)
+# REDIS_URL=
 EOL
 
 # Create uploads directory
@@ -199,7 +197,7 @@ cat > /opt/voiceloophr/health-check.sh << 'EOF'
 
 # Health check script for VoiceLoop HR
 HEALTH_URL="http://localhost:3000/api/health"
-RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_URL)
+RESPONSE=$(curl -s -o /dev/null -w "%%{http_code}" $HEALTH_URL)
 
 if [ $RESPONSE -eq 200 ]; then
     echo "Application is healthy"
