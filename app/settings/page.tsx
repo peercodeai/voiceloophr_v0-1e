@@ -190,12 +190,29 @@ export default function SettingsPage() {
                 Configure your API keys to enable AI processing and voice features
               </p>
 
+              {/* Demo Mode Notice */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle className="h-5 w-5 text-blue-600" />
+                  <h3 className="text-lg font-montserrat-light text-blue-900">Demo Mode Available</h3>
+                </div>
+                <p className="text-sm text-blue-800 font-montserrat-light">
+                  🎉 <strong>Great news!</strong> You can use VoiceLoop HR without entering your own API key. 
+                  The app now works in demo mode using our server-side configuration. 
+                  Upload documents and try the AI features right away!
+                </p>
+                <p className="text-xs text-blue-700 font-montserrat-light mt-2">
+                  💡 <em>Optional:</em> Enter your own API key below for personal usage tracking and higher rate limits.
+                </p>
+              </div>
+
               {/* OpenAI API Key */}
               <div className="space-y-4">
                 <div>
                   <h3 className="text-lg font-montserrat-light mb-2">OpenAI API Key</h3>
                   <p className="text-sm text-muted-foreground font-montserrat-light mb-4">
-                    Required for document summarization (GPT-4) and audio transcription (Whisper)
+                    Optional: Personal API key for document summarization (GPT-4) and audio transcription (Whisper). 
+                    Leave empty to use demo mode.
                   </p>
                 </div>
 

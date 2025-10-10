@@ -1033,12 +1033,12 @@ export default function UploadPage() {
                   <div className="h-5 w-5 text-blue-600 dark:text-blue-400">🔑</div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                      Guest Mode - API Keys Required
+                      Demo Mode Active
                     </p>
                     <p className="text-xs text-blue-700 dark:text-blue-300">
-                      Enter your OpenAI API key in Settings to enable AI analysis. 
+                      AI analysis works automatically! No API key needed. 
                       <Link href="/settings" className="text-blue-800 dark:text-blue-200 underline ml-1 hover:text-blue-900 dark:hover:text-blue-100">
-                        Go to Settings
+                        Optional: Add your own key in Settings
                       </Link>
                     </p>
                   </div>
@@ -1055,9 +1055,9 @@ export default function UploadPage() {
                       OpenAI API Key Not Configured
                     </p>
                     <p className="text-xs text-yellow-700">
-                      Files will be uploaded and processed, but AI analysis will be skipped. 
+                      Files will be uploaded and processed with full AI analysis using demo mode. 
                       <Link href="/settings" className="text-yellow-800 underline ml-1 hover:text-yellow-900">
-                        Configure API key in Settings
+                        Optional: Configure your own API key in Settings
                       </Link>
                     </p>
                   </div>

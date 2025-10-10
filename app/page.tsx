@@ -115,8 +115,7 @@ export default function HomePage() {
           {process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true' && (
             <div className="mb-6 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg max-w-2xl mx-auto">
               <p className="text-green-800 dark:text-green-200 font-montserrat-light text-center">
-                🎉 <strong>Guest Mode Enabled</strong> - You can use the app directly without signing in! 
-                Just enter your API keys in Settings to get started.
+                🎉 <strong>Demo Mode Active</strong> - Try VoiceLoop HR right now! Upload documents and experience AI-powered analysis without needing your own API key.
               </p>
             </div>
           )}
