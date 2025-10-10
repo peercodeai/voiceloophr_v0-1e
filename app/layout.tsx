@@ -106,7 +106,7 @@ export default function RootLayout({
             {children}
           </ThemeProvider>
         </Suspense>
-        <AnalyticsWrapper />
+        {/* <AnalyticsWrapper /> */}
       </body>
     </html>
   )

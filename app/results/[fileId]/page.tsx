@@ -234,14 +234,17 @@ export default function ResultsPage() {
     try {
       console.log('🚀 Attempting OpenAI analysis...')
       
+      // Get user's API key from localStorage
+      const userApiKey = typeof window !== 'undefined' ? localStorage.getItem('voiceloop_openai_key') : null
+      
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           text,
           fileName,
-          fileType: 'application/pdf'
-          // Server will use OPENAI_API_KEY environment variable
+          fileType: 'application/pdf',
+          openaiKey: userApiKey // Pass user's API key
         })
       })
 

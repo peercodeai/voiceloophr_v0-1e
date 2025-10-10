@@ -26,6 +26,24 @@ export default function TestEnvPage() {
             {process.env.NODE_ENV || 'NOT SET'}
           </span>
         </div>
+        
+        <div>
+          <strong>NEXT_PUBLIC_DISABLE_AUTH:</strong> 
+          <span className="ml-2 font-mono bg-gray-100 p-1 rounded">
+            {process.env.NEXT_PUBLIC_DISABLE_AUTH || 'NOT SET'}
+          </span>
+        </div>
+        
+        <div>
+          <strong>Demo Mode Status:</strong> 
+          <span className={`ml-2 font-mono p-1 rounded ${
+            process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true' 
+              ? 'bg-green-100 text-green-800' 
+              : 'bg-red-100 text-red-800'
+          }`}>
+            {process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true' ? 'ENABLED' : 'DISABLED'}
+          </span>
+        </div>
       </div>
     </div>
   )

@@ -3,6 +3,8 @@ import { OpenAIService } from '@/lib/services/openai'
 import { documentAnalysisSchema, validateRequest, createErrorResponse, APIError } from '@/lib/validation'
 
 export async function POST(request: NextRequest) {
+  let openaiKey: string | undefined
+  
   try {
     // Log the request for debugging
     console.log('🔍 Analyze API called at:', new Date().toISOString())
@@ -12,7 +14,10 @@ export async function POST(request: NextRequest) {
     })
 
     const body = await request.json()
-    const { text, fileName, fileType, openaiKey } = validateRequest(documentAnalysisSchema, body)
+    const { text: originalText, fileName, fileType, openaiKey: userOpenaiKey } = validateRequest(documentAnalysisSchema, body)
+    
+    // Store openaiKey for error handling
+    openaiKey = userOpenaiKey
     
     // Provide defaults for optional fields
     const finalFileName = fileName || 'document'
@@ -20,6 +25,9 @@ export async function POST(request: NextRequest) {
 
     // Use user-provided API key if available, otherwise fall back to environment variable
     const finalOpenaiKey = openaiKey || process.env.OPENAI_API_KEY;
+    
+    // Create a mutable copy of text for truncation
+    let text = originalText
     
     console.log('🔑 API Key check:', {
       hasUserKey: !!openaiKey,

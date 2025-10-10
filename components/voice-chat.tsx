@@ -265,6 +265,9 @@ export default function VoiceChat({ fileId, fileName, documentText, documentName
         }
       }
 
+      // Get user's API key from localStorage
+      const userApiKey = typeof window !== 'undefined' ? localStorage.getItem('voiceloop_openai_key') : null
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
@@ -274,6 +277,7 @@ export default function VoiceChat({ fileId, fileName, documentText, documentName
           message,
           fileId,
           contextText: documentText && documentText.length > 0 ? String(documentText).slice(0, 12000) : contextText,
+          openaiKey: userApiKey, // Pass user's API key
         }),
       })
 
@@ -382,10 +386,17 @@ export default function VoiceChat({ fileId, fileName, documentText, documentName
       // Try OpenAI TTS
       let ok = false
       try {
+        // Get user's API key from localStorage
+        const userApiKey = typeof window !== 'undefined' ? localStorage.getItem('voiceloop_openai_key') : null
+        
         const resp = await fetch('/api/tts/openai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: text.slice(0, 800), voice: 'alloy' })
+          body: JSON.stringify({ 
+            text: text.slice(0, 800), 
+            voice: 'alloy',
+            openaiKey: userApiKey // Pass user's API key
+          })
         })
         if (!resp.ok) throw new Error(await resp.text())
         const blob = await resp.blob()
