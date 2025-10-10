@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+// Initialize OpenAI client only when needed to avoid build-time errors
+function getOpenAIClient(apiKey?: string) {
+  const key = apiKey || process.env.OPENAI_API_KEY
+  if (!key) {
+    throw new Error('OpenAI API key not provided')
+  }
+  return new OpenAI({ apiKey: key })
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const { query, allDocuments } = await request.json()
+    const { query, allDocuments, openaiKey } = await request.json()
 
     // Get all document data from your global storage
     const documents = await getAllDocumentData()
@@ -18,6 +23,9 @@ export async function POST(request: NextRequest) {
 
     // Create query prompt
     const prompt = createQueryPrompt(documents, query)
+
+    // Initialize OpenAI client with user's API key or fallback to environment
+    const openai = getOpenAIClient(openaiKey)
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
